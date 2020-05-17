@@ -18,7 +18,7 @@ PROGRAM TestSolverFromFile
 
     CALL RANDOM_SEED()
 
-    CALL model%load('../models/toggle_model.input')
+    CALL model%load('toggle_model.input')
 
     ! initialize the attributes of the fsp based on the underlying model
     CALL fsp_in%init(model)

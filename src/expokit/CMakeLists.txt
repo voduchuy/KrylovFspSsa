@@ -2,8 +2,8 @@ set (MOD_NAME EXPOKIT)
 set (${MOD_NAME}_COMPONENTS
         dgchbv
         dgpadm
+        clock
         )
-
 foreach(MOD ${${MOD_NAME}_COMPONENTS})
     list(APPEND SRCS ${MOD}.f)
 endforeach()

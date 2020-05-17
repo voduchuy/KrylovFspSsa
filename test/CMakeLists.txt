@@ -1,6 +1,6 @@
 set(PROGS
-        solve_goutsias
-        solve_toggle
+        TestModelParser
+        TestSolverFromFile
         )
 set(DEPS PARSER_OBJS MODEL_OBJS STATE_SPACE_OBJS KRYLOVFSP_OBJS EXPOKIT_OBJS -lblas -llapack)
 

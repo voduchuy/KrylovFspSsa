@@ -9,7 +9,7 @@ foreach(MOD ${${MOD_NAME}_COMPONENTS})
     list(APPEND SRCS ${MOD}.${EXTENSION})
 endforeach()
 
-add_fortran_object(${MOD_NAME}_OBJS ${SRCS})
+add_fortran_object(${MOD_NAME}_OBJS ${SRCS} ${KFSSA_OBJS})
 target_link_libraries(${MOD_NAME}_OBJS ${DEPS})
 
 list(APPEND KFSSA_OBJS "$<TARGET_OBJECTS:${MOD_NAME}_OBJS>")
