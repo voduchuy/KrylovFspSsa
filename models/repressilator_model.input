@@ -1,0 +1,37 @@
+nspecies
+3
+
+nreactions
+6
+
+nparameters
+6
+
+species
+S1
+S2
+S3
+
+parameters
+a1
+a2
+a3
+b1
+b2
+b3
+
+reactions
+0 -> S1
+0 -> S2
+0 -> S3
+S1 -> 0
+S2 -> 0
+S3 -> 0
+
+propensities
+a1/(1.0 + S3**(2.5d0))
+a2/(1.0 + S1**(1.5d0))
+a3/(1.0 + S2**(1.5d0))
+b1*S1
+b2*S2
+b3*S3

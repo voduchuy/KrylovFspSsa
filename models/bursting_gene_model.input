@@ -1,0 +1,24 @@
+nspecies
+2
+
+nreactions
+4
+
+nparameters
+4
+
+species
+Gene_state
+RNA
+
+parameters
+k1
+k2
+k3
+k4
+
+reactions
+0 -> Gene_state
+Gene_state -> 0
+0 -> RNA
+RNA -> 0

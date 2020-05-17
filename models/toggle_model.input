@@ -1,0 +1,32 @@
+nspecies
+2
+
+nreactions
+4
+
+nparameters
+6
+
+species
+X
+Y
+
+parameters
+bx
+kx
+dx
+by
+ky
+dy
+
+reactions
+0 -> X
+X -> 0
+0 -> Y
+Y -> 0
+
+propensities
+bx + kx/(2.0 + 0.2*Y^2)
+dx*X
+by + ky/(1.0 + 0.5*X^1.5)
+dy*Y

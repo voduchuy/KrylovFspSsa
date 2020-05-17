@@ -1,0 +1,48 @@
+nspecies
+5
+
+nreactions
+14
+
+nparameters
+14
+
+species
+Gene_state
+RNA1_nuc
+RNA2_nuc
+RNA1_cyt
+RNA2_cyt
+
+parameters
+k12
+k23
+k34
+k43
+k32
+k21
+g11
+g12
+g13
+g14
+g21
+g22
+g23
+g24
+d1nuc
+d2nuc
+d1cyt
+d2cyt
+ktransloc
+
+reactions
+0 -> Gene_state
+Gene_state -> 0
+0 -> RNA1_nuc
+0 -> RNA2_nuc
+RNA1_nuc -> 0
+RNA2_nuc -> 0
+RNA1_cyt -> 0
+RNA2_cyt -> 0
+RNA1_nuc -> RNA1_cyt
+RNA2_nuc -> RNA2_cyt

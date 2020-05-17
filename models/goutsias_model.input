@@ -1,0 +1,53 @@
+
+nspecies
+6
+
+nreactions
+10
+
+nparameters
+10
+
+species
+M
+D
+RNA
+DNA
+DNA.D
+DNA.2D
+
+parameters
+c1
+c2
+c3
+c4
+c5
+c6
+c7
+c8
+c9
+c10
+
+reactions
+RNA -> RNA + M
+M -> 0
+DNA.D -> RNA + DNA.D
+RNA -> 0
+DNA + D -> DNA.D
+DNA.D -> DNA + D
+DNA.D + D -> DNA.2D
+DNA.2D -> DNA.D + D
+2M -> D
+D -> 2M
+
+propensities
+c1*RNA
+c2*M
+c3*DNA.D
+c4*RNA
+c5*DNA*D
+c6*DNA.D
+c7*DNA.D*D
+c8*DNA.2D
+c9*M*(M-1)/2.0d0
+c10*D
