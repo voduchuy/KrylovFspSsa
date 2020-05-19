@@ -1,655 +1,655 @@
-!     A solver for the Chemical Master equation
-!     by using the Krylov-FSP-SSA algorithm
-MODULE KrylovSolver
-    USE StateSpace
+!     A SOLVER FOR THE CHEMICAL MASTER EQUATION
+!     BY USING THE KRYLOV-FSP-SSA ALGORITHM
+MODULE KRYLOVSOLVER
+  USE STATESPACE
 CONTAINS
-    !=====================Interface for Krylov-FSP-SSA algorithm
-    SUBROUTINE cme_solve(model, t, fsp_in, fsp_out, FSPTol, exp_tol, verbosity)
-        IMPLICIT NONE
-        !------------------------------------------------Input/output parameters
-        !     The underlying model
-        TYPE (cme_model), INTENT(in) :: model
-        !     Time elapsed for the CME solution
-        DOUBLE PRECISION, INTENT(in) :: t
-        !     hash table of the FSP
-        TYPE(finite_state_projection) :: fsp_in
-        !     Tolerance of the Krylov-FSP-SSA algorithm
-        DOUBLE PRECISION, INTENT(in) :: FSPTol
-        !     Tolerance of the local exponential approximation
-        DOUBLE PRECISION, INTENT(in) :: exp_tol
-        !     hash table of the FSP
-        TYPE(finite_state_projection) :: fsp_out
-        !-----------------------------------------verbosity and error flag
-        INTEGER, INTENT(in), OPTIONAL :: verbosity
-        INTEGER :: itrace, iflag
-        !-------------------------------------Apply the Krylov-FSP-SSA algorithm
-        IF (PRESENT(verbosity)) THEN
-            itrace = verbosity
-        ELSE
-            itrace = 0
-        ENDIF
+  !=====================INTERFACE FOR KRYLOV-FSP-SSA ALGORITHM
+  SUBROUTINE CME_SOLVE(MODEL, T, FSP_IN, FSP_OUT, FSPTOL, EXP_TOL, VERBOSITY)
+    IMPLICIT NONE
+    !------------------------------------------------INPUT/OUTPUT PARAMETERS
+    !     THE UNDERLYING MODEL
+    TYPE (CME_MODEL), INTENT(IN) :: MODEL
+    !     TIME ELAPSED FOR THE CME SOLUTION
+    DOUBLE PRECISION, INTENT(IN) :: T
+    !     HASH TABLE OF THE FSP
+    TYPE(FINITE_STATE_PROJECTION) :: FSP_IN
+    !     TOLERANCE OF THE KRYLOV-FSP-SSA ALGORITHM
+    DOUBLE PRECISION, INTENT(IN) :: FSPTOL
+    !     TOLERANCE OF THE LOCAL EXPONENTIAL APPROXIMATION
+    DOUBLE PRECISION, INTENT(IN) :: EXP_TOL
+    !     HASH TABLE OF THE FSP
+    TYPE(FINITE_STATE_PROJECTION) :: FSP_OUT
+    !-----------------------------------------VERBOSITY AND ERROR FLAG
+    INTEGER, INTENT(IN), OPTIONAL :: VERBOSITY
+    INTEGER :: ITRACE, IFLAG
+    !-------------------------------------APPLY THE KRYLOV-FSP-SSA ALGORITHM
+    IF (PRESENT(VERBOSITY)) THEN
+       ITRACE = VERBOSITY
+    ELSE
+       ITRACE = 0
+    ENDIF
 
-        PRINT*, 'calling dgexpv_fsp'
-        CALL dgexpv_fsp(model, t, fsp_in%vector, fsp_out, fsp_out%vector, &
-                FSPTol, exp_tol, itrace, iflag)
+    PRINT*, 'CALLING DGEXPV_FSP'
+    CALL DGEXPV_FSP(MODEL, T, FSP_IN%VECTOR, FSP_OUT, FSP_OUT%VECTOR, &
+         FSPTOL, EXP_TOL, ITRACE, IFLAG)
 
-    END SUBROUTINE cme_solve
-
-
-    !===============================================Krylov-FSP-SSA algorithm
-    SUBROUTINE dgexpv_fsp(model, t, v, fsp, w, FSPTol, KryTol, itrace, iflag)
-        IMPLICIT NONE
-
-        INTEGER :: nfull
-        PARAMETER(nfull = nmax)
-
-        INTEGER :: m_max, m_min
-        PARAMETER(m_max = 100, m_min = 10)
-        !     Workspace
-        INTEGER :: lwsp, liwsp
-        PARAMETER(lwsp = nfull * (m_max + 2) + 5 * (m_max + 2)**2 + 7, liwsp = nfull)
-        DOUBLE PRECISION :: wsp(lwsp)
-        INTEGER :: iwsp(liwsp)
-
-        !     The underlying model
-        TYPE(cme_model) :: model
-        !     Time elapsed for the CME solution
-        DOUBLE PRECISION, INTENT(in) :: t
-        !     Input probability vector
-        DOUBLE PRECISION, INTENT(in) :: v(:)
-        !     Output probability vector
-        DOUBLE PRECISION, INTENT(out) :: w(:)
-        !     Tolerance of the Krylov-FSP-SSA algorithm
-        DOUBLE PRECISION, INTENT(in) :: FSPTol
-        !     Tolerance of the local Krylov error
-        DOUBLE PRECISION :: KryTol
-
-        TYPE(finite_state_projection) :: fsp
-        !
-        INTEGER :: itrace
-        !
-        INTEGER :: iflag
+  END SUBROUTINE CME_SOLVE
 
 
-        !-------------------------Parameters for the stepsize control of EXPOKIT
-        !     maximum allowable number of integration steps;
-        !     0 means an infinite number of steps
-        INTEGER, PARAMETER :: mxstep = 0
+  !===============================================KRYLOV-FSP-SSA ALGORITHM
+  SUBROUTINE DGEXPV_FSP(MODEL, T, V, FSP, W, FSPTOL, KRYTOL, ITRACE, IFLAG)
+    IMPLICIT NONE
 
-        INTEGER, PARAMETER :: mxreject = 0         !     maximum allowable number of rejections at each step;
-        !     0 means an infinite number of rejections
+    INTEGER :: NFULL
+    PARAMETER(NFULL = NMAX)
 
-        INTEGER, PARAMETER :: ideg = 6         !     The Pade approximation of type (ideg,ideg) is used as an
-        !     approximation to exp(H); the value 0 switches to the uniform
-        !     rational Chebyshev approximation of type (14,14)
-        DOUBLE PRECISION, PARAMETER :: delta = 1.2d0 !     Local truncation error `safety factor'
-        !     Stepsize `shrinking factor'
-        DOUBLE PRECISION, PARAMETER :: gamma = 0.9d0
+    INTEGER :: M_MAX, M_MIN
+    PARAMETER(M_MAX = 100, M_MIN = 10)
+    !     WORKSPACE
+    INTEGER :: LWSP, LIWSP
+    PARAMETER(LWSP = NFULL * (M_MAX + 2) + 5 * (M_MAX + 2)**2 + 7, LIWSP = NFULL)
+    DOUBLE PRECISION :: WSP(LWSP)
+    INTEGER :: IWSP(LIWSP)
 
+    !     THE UNDERLYING MODEL
+    TYPE(CME_MODEL) :: MODEL
+    !     TIME ELAPSED FOR THE CME SOLUTION
+    DOUBLE PRECISION, INTENT(IN) :: T
+    !     INPUT PROBABILITY VECTOR
+    DOUBLE PRECISION, INTENT(IN) :: V(:)
+    !     OUTPUT PROBABILITY VECTOR
+    DOUBLE PRECISION, INTENT(OUT) :: W(:)
+    !     TOLERANCE OF THE KRYLOV-FSP-SSA ALGORITHM
+    DOUBLE PRECISION, INTENT(IN) :: FSPTOL
+    !     TOLERANCE OF THE LOCAL KRYLOV ERROR
+    DOUBLE PRECISION :: KRYTOL
 
-        !--------------------------------------------Parameters of the algorithm
-        INTEGER :: n, m
-        DOUBLE PRECISION :: anorm, wtmp(nfull)
-        INTEGER :: i, j, k1, mh, mx, iv, ih, j1v, ns, ifree, lfree, iexph
-        INTEGER :: ireject, ibrkflag, mbrkdwn, nmult, nreject, nexph
-        INTEGER :: nscale, nstep
-        DOUBLE PRECISION :: sgn, t_out, tbrkdwn, step_min, step_max, err_loc
-        DOUBLE PRECISION :: s_error, x_error, t_now, t_new, t_step, t_old
-        DOUBLE PRECISION :: xm, beta, break_tol, p1, p2, p3, eps, rndoff
-        DOUBLE PRECISION :: vnorm, avnorm, hj1j, hij, hump, sqr1
-        INTRINSIC :: aint, abs, dble, log10, max, min, nint, sign
-        DOUBLE PRECISION :: ddot, dnrm2, dasum
-
-        DOUBLE PRECISION :: htmp((m_max + 2) * (m_max + 2))
-
-        ! For the Krylov dimension adaptivity,
-        DOUBLE PRECISION :: k_factor, order
-        LOGICAL :: m_changed, orderold, kestold
-        INTEGER :: m_new, m_old, imreject, jold, ih_old
-        REAL :: cost1, cost2
-        DOUBLE PRECISION :: omega, omega_old, t_opt
-        DOUBLE PRECISION :: hnorm, nom
-        INTEGER :: nnz, m_start, m_opt
-        INTEGER :: qiop
-
-        ! For the FSP adaptivity
-        INTEGER :: n_now, iexpand
-        DOUBLE PRECISION :: wsum, t_ratio
-        LOGICAL :: drop(nfull)
-        DOUBLE PRECISION :: error, errorold, tau_old, tfsp
-        DOUBLE PRECISION :: fsporder
-        INTEGER :: irejectfsp, istart
-        DOUBLE PRECISION :: t_ssa
-        DOUBLE PRECISION :: wsum_old
-        DOUBLE PRECISION :: droptol, dsum
+    TYPE(FINITE_STATE_PROJECTION) :: FSP
+    !
+    INTEGER :: ITRACE
+    !
+    INTEGER :: IFLAG
 
 
-        !------------------------------------Check and initialize the parameters
-        !     Assume ||A||=1, usually it is unknown
-        anorm = 1.0d0
-        CALL matrix_starter(fsp, model)
+    !-------------------------PARAMETERS FOR THE STEPSIZE CONTROL OF EXPOKIT
+    !     MAXIMUM ALLOWABLE NUMBER OF INTEGRATION STEPS;
+    !     0 MEANS AN INFINITE NUMBER OF STEPS
+    INTEGER, PARAMETER :: MXSTEP = 0
 
-        DO i = 1, 5
-            CALL onestep_extender(fsp, model)
-        ENDDO
-        !     Initialize the Krylov dimension and orthogonalization length
-        m = m_min
-        qiop = 2
-        istart = 1
-        n = nfull
+    INTEGER, PARAMETER :: MXREJECT = 0         !     MAXIMUM ALLOWABLE NUMBER OF REJECTIONS AT EACH STEP;
+    !     0 MEANS AN INFINITE NUMBER OF REJECTIONS
 
-        !     Check the restrictions on the input parameters
-        iflag = 0
-        IF (lwsp<(n * (m + 2) + 5 * (m + 2)**2 + ideg + 1))  iflag = -1
-        IF (liwsp<(m + 2))                       iflag = -2
-        IF ((m>=n).OR.(m<=0))                 iflag = -3
-        IF (iflag.NE.0) THEN
-            PRINT*, 'Bad sizes (in input of DgeXPV), iflag = ', iflag
-            STOP
-        END IF
+    INTEGER, PARAMETER :: IDEG = 6         !     THE PADE APPROXIMATION OF TYPE (IDEG,IDEG) IS USED AS AN
+    !     APPROXIMATION TO EXP(H); THE VALUE 0 SWITCHES TO THE UNIFORM
+    !     RATIONAL CHEBYSHEV APPROXIMATION OF TYPE (14,14)
+    DOUBLE PRECISION, PARAMETER :: DELTA = 1.2D0 !     LOCAL TRUNCATION ERROR `SAFETY FACTOR'
+    !     STEPSIZE `SHRINKING FACTOR'
+    DOUBLE PRECISION, PARAMETER :: GAMMA = 0.9D0
 
-        !     Initialize the parameters
-        ibrkflag = 0
-        nmult = 0
-        nreject = 0
-        nexph = 0
-        nscale = 0
-        t_out = ABS(t)
-        tbrkdwn = 0.0d0
-        step_min = t_out
-        step_max = 0.0d0
-        nstep = 0
-        s_error = 0.0d0
-        x_error = 0.0d0
-        t_now = 0.0d0
-        t_new = 0.0d0
-        p1 = 4.0d0 / 3.0d0
-        1   p2 = p1 - 1.0d0
-        p3 = p2 + p2 + p2
-        eps = ABS(p3 - 1.0d0)
-        IF (eps==0.0d0) go to 1
-        IF (KryTol<=eps)   KryTol = SQRT(eps)
-        rndoff = eps * anorm
-        break_tol = 1.0d-07
-        sgn = SIGN(1.0d0, t)
 
-        CALL dcopy(fsp%size, v, 1, w, 1)
-        beta = dnrm2(fsp%size, w, 1)
-        vnorm = beta
-        hump = beta
+    !--------------------------------------------PARAMETERS OF THE ALGORITHM
+    INTEGER :: N, M
+    DOUBLE PRECISION :: ANORM, WTMP(NFULL)
+    INTEGER :: I, J, K1, MH, MX, IV, IH, J1V, NS, IFREE, LFREE, IEXPH
+    INTEGER :: IREJECT, IBRKFLAG, MBRKDWN, NMULT, NREJECT, NEXPH
+    INTEGER :: NSCALE, NSTEP
+    DOUBLE PRECISION :: SGN, T_OUT, TBRKDWN, STEP_MIN, STEP_MAX, ERR_LOC
+    DOUBLE PRECISION :: S_ERROR, X_ERROR, T_NOW, T_NEW, T_STEP, T_OLD
+    DOUBLE PRECISION :: XM, BETA, BREAK_TOL, P1, P2, P3, EPS, RNDOFF
+    DOUBLE PRECISION :: VNORM, AVNORM, HJ1J, HIJ, HUMP, SQR1
+    INTRINSIC :: AINT, ABS, DBLE, LOG10, MAX, MIN, NINT, SIGN
+    DOUBLE PRECISION :: DDOT, DNRM2, DASUM
 
-        !     Obtain the very first stepsize
-        sqr1 = SQRT(0.1d0)
-        xm = 1.0d0 / DBLE(m)
-        p1 = KryTol * (((m + 1) / 2.72D0)**(m + 1)) * SQRT(2.0D0 * 3.14D0 * (m + 1))
-        t_new = (1.0d0 / anorm) * (p1 / (4.0d0 * beta * anorm))**xm
-        p1 = 10.0d0**(NINT(LOG10(t_new) - sqr1) - 1)
-        t_new = AINT(t_new / p1 + 0.55d0) * p1
+    DOUBLE PRECISION :: HTMP((M_MAX + 2) * (M_MAX + 2))
 
-        !     Initialize the FSP parameters
-        n_now = fsp%size
-        iexpand = 0
-        wsum_old = 1.0d0
-        irejectfsp = 0
-        droptol = 1.0d-8
+    ! FOR THE KRYLOV DIMENSION ADAPTIVITY,
+    DOUBLE PRECISION :: K_FACTOR, ORDER
+    LOGICAL :: M_CHANGED, ORDEROLD, KESTOLD
+    INTEGER :: M_NEW, M_OLD, IMREJECT, JOLD, IH_OLD
+    REAL :: COST1, COST2
+    DOUBLE PRECISION :: OMEGA, OMEGA_OLD, T_OPT
+    DOUBLE PRECISION :: HNORM, NOM
+    INTEGER :: NNZ, M_START, M_OPT
+    INTEGER :: QIOP
 
-        nnz = (model%nReactions + 1) * fsp%size
+    ! FOR THE FSP ADAPTIVITY
+    INTEGER :: N_NOW, IEXPAND
+    DOUBLE PRECISION :: WSUM, T_RATIO
+    LOGICAL :: DROP(NFULL)
+    DOUBLE PRECISION :: ERROR, ERROROLD, TAU_OLD, TFSP
+    DOUBLE PRECISION :: FSPORDER
+    INTEGER :: IREJECTFSP, ISTART
+    DOUBLE PRECISION :: T_SSA
+    DOUBLE PRECISION :: WSUM_OLD
+    DOUBLE PRECISION :: DROPTOL, DSUM
 
-        !     Parameters for the Krylov subspace adaptivity,
-        !     based on Niesen and Wright
-        imreject = 0
-        jold = 1
-        m_new = m
-        orderold = .TRUE.
-        kestold = .TRUE.
 
-        100 IF (t_now >= t_out) GOTO 500
-        !     Find the real stepsize
-        t_step = MIN(t_out - t_now, t_new)
-        !     Compute the Arnoldi matrices H_m and V_m
-        n = n_now
-        m = MIN(n - 1, m_new)
-        mbrkdwn = m
-        !     Find pointers into the workspace
-        k1 = 2
-        mh = m + 2
-        iv = 1
-        ih = iv + n * (m + 1) + n
-        ifree = ih + mh * mh
-        lfree = lwsp - ifree + 1
+    !------------------------------------CHECK AND INITIALIZE THE PARAMETERS
+    !     ASSUME ||A||=1, USUALLY IT IS UNKNOWN
+    ANORM = 1.0D0
+    CALL MATRIX_STARTER(FSP, MODEL)
 
-        nstep = nstep + 1
+    DO I = 1, 5
+       CALL ONESTEP_EXTENDER(FSP, MODEL)
+    ENDDO
+    !     INITIALIZE THE KRYLOV DIMENSION AND ORTHOGONALIZATION LENGTH
+    M = M_MIN
+    QIOP = 2
+    ISTART = 1
+    N = NFULL
 
-        p1 = 1.0d0 / beta
-        DO i = 1, n
-            wsp(iv + i - 1) = p1 * w(i)
-        ENDDO
-        DO i = 1, mh * mh
-            wsp(ih + i - 1) = 0.0d0
-        ENDDO
+    !     CHECK THE RESTRICTIONS ON THE INPUT PARAMETERS
+    IFLAG = 0
+    IF (LWSP<(N * (M + 2) + 5 * (M + 2)**2 + IDEG + 1))  IFLAG = -1
+    IF (LIWSP<(M + 2))                       IFLAG = -2
+    IF ((M>=N).OR.(M<=0))                 IFLAG = -3
+    IF (IFLAG.NE.0) THEN
+       PRINT*, 'BAD SIZES (IN INPUT OF DGEXPV), IFLAG = ', IFLAG
+       STOP
+    END IF
 
-        ireject = 0
-        !     Start the stopwatch
-        IF (itrace.NE.0) THEN
-            PRINT*, 'beginning IOP...'
-        ENDIF
-        101 CONTINUE
-        j1v = iv + jold * n
-        DO 200 j = jold, m
-            nmult = nmult + 1
-            CALL fmatvec(wsp(j1v - n), wsp(j1v), fsp%matrix)
-            IF (qiop>0)    istart = MAX(1, j - qiop + 1)
-            DO i = istart, j
-                hij = ddot(n, wsp(iv + (i - 1) * n), 1, wsp(j1v), 1)
-                CALL daxpy(n, -hij, wsp(iv + (i - 1) * n), 1, wsp(j1v), 1)
-                wsp(ih + (j - 1) * mh + i - 1) = hij
-            ENDDO
-            hj1j = dnrm2(n, wsp(j1v), 1)
-            !           If a `happy breakdown' occurs, go straightforward at the end
-            IF (hj1j<=break_tol) THEN
-                k1 = 0
-                ibrkflag = 1
-                mbrkdwn = j
-                tbrkdwn = t_now
-                t_step = t_out - t_now
-                go to 300
-            END IF
-            wsp(ih + (j - 1) * mh + j) = hj1j
-            CALL DSCAL(n, 1.0d0 / hj1j, wsp(j1v), 1)
-            j1v = j1v + n
-        200    CONTINUE
-        nmult = nmult + 1
-        CALL fmatvec(wsp(j1v - n), wsp(j1v), fsp%matrix)
-        avnorm = DNRM2(n, wsp(j1v), 1)
-        !     Set 1 for the 2-corrected scheme
-        300    CONTINUE
-        wsp(ih + m * mh + m + 1) = 1.0d0
-        401    CONTINUE
+    !     INITIALIZE THE PARAMETERS
+    IBRKFLAG = 0
+    NMULT = 0
+    NREJECT = 0
+    NEXPH = 0
+    NSCALE = 0
+    T_OUT = ABS(T)
+    TBRKDWN = 0.0D0
+    STEP_MIN = T_OUT
+    STEP_MAX = 0.0D0
+    NSTEP = 0
+    S_ERROR = 0.0D0
+    X_ERROR = 0.0D0
+    T_NOW = 0.0D0
+    T_NEW = 0.0D0
+    P1 = 4.0D0 / 3.0D0
+1   P2 = P1 - 1.0D0
+    P3 = P2 + P2 + P2
+    EPS = ABS(P3 - 1.0D0)
+    IF (EPS==0.0D0) GO TO 1
+    IF (KRYTOL<=EPS)   KRYTOL = SQRT(EPS)
+    RNDOFF = EPS * ANORM
+    BREAK_TOL = 1.0D-07
+    SGN = SIGN(1.0D0, T)
 
-        !     Compute w=beta*V*exp(t_step*H)*e1...
-        nexph = nexph + 1
-        mx = mbrkdwn + k1
-        IF (ideg.NE.0) THEN
-            !           by the irreducible rational Pade approximation...
-            CALL dgpadmnorm(ideg, mx, sgn * t_step, wsp(ih), mh, &
-                    wsp(ifree), lfree, iwsp, iexph, ns, iflag, hnorm)
-            iexph = ifree + iexph - 1
-            nscale = nscale + ns
-        ELSE
-            !           or the uniform rational Chebyshev approximation
-            iexph = ifree
-            DO i = 1, mx
-                wsp(iexph + i - 1) = 0.0d0
-            ENDDO
-            wsp(iexph) = 1.0d0
-            CALL dgchbv(mx, sgn * t_step, wsp(ih), mh, &
-                    wsp(iexph), wsp(ifree + mx))
-        ENDIF
-        402    CONTINUE
-        !     Estimate the error
-        IF (k1==0) THEN
-            err_loc = KryTol
-        ELSE
-            p1 = ABS(wsp(iexph + m)) * beta
-            p2 = ABS(wsp(iexph + m + 1)) * beta * avnorm
-            IF (p1>10.0d0 * p2) THEN
-                err_loc = p2
-                xm = 1.0d0 / DBLE(m)
-            ELSE IF (p1>p2) THEN
-                err_loc = (p1 * p2) / (p1 - p2)
-                xm = 1.0d0 / DBLE(m)
-            ELSE
-                err_loc = p1
-                xm = 1.0d0 / DBLE(m - 1)
-            END IF
-        ENDIF
-        !     Reduce the stepsize if the error is out of bound
-        IF (isnan(err_loc)) THEN
-            t_step = t_step / 5.0d0
-            go to 401
-        ENDIF
+    CALL DCOPY(FSP%SIZE, V, 1, W, 1)
+    BETA = DNRM2(FSP%SIZE, W, 1)
+    VNORM = BETA
+    HUMP = BETA
 
-        !     Find the ratio of error per unit step
-        omega_old = omega
-        omega = err_loc / (KryTol * t_step)
-        !     Estimate the order
-        IF ((m==m_old).AND.(t_step.NE.t_old).AND.(ireject>=1)) THEN
-            order = MAX(1.0d0, LOG(omega / omega_old) / LOG(t_step / t_old))
-            orderold = .FALSE.
-        ELSE IF (orderold.OR.ireject==0) THEN
-            order = DBLE(m) / 4.0d0
-            orderold = .TRUE.
-        ELSE
-            orderold = .TRUE.
-        ENDIF
-        !     Estimate kappa
-        IF ((m.NE.m_old).AND.(t_step==t_old).AND.(ireject>=1)) THEN
-            k_factor = MAX(1.1d0, (omega / omega_old)**(1.0d0 / (m_old - m)))
-            kestold = .FALSE.
-        ELSE IF (kestold .OR. ireject==0) THEN
-            kestold = .TRUE.
-            k_factor = 2.0d0
-        ELSE
-            kestold = .TRUE.
-        ENDIF
-        !     Record the old step size and Krylov dimension
-        t_old = t_step
-        m_old = m
-        !     Suggest new step size and Krylov dimension
-        IF ((m==m_max).AND.(omega>delta).OR.(imreject>4)) THEN
-            t_new = MIN(t_out - t_now, &
-                    MAX(t_step / 5.0d0, &
-                            MIN(5.0d0 * t_step, &
-                                    gamma * t_step * omega**(-1.0d0 / order))))
-            p1 = 10.0d0**(NINT(LOG10(t_new) - sqr1) - 1)
-            t_new = AINT(t_new / p1) * p1
-            m_changed = .FALSE.
-        ELSE
-            !           Compute options for the new step size and Krylov dimension
-            t_opt = MIN(t_out - t_now, &
-                    MAX(t_step / 5.0d0, &
-                            MIN(5.0d0 * t_step, &
-                                    gamma * t_step * omega**(-1.0d0 / order))))
-            m_opt = MIN(MAX(m_min, 3 * m / 4, &
-                    m + CEILING(LOG(omega) / LOG(k_factor))), &
-                    m_max, &
-                    CEILING(4.0d0 * m / 3.0d0) + 1)
+    !     OBTAIN THE VERY FIRST STEPSIZE
+    SQR1 = SQRT(0.1D0)
+    XM = 1.0D0 / DBLE(M)
+    P1 = KRYTOL * (((M + 1) / 2.72D0)**(M + 1)) * SQRT(2.0D0 * 3.14D0 * (M + 1))
+    T_NEW = (1.0D0 / ANORM) * (P1 / (4.0D0 * BETA * ANORM))**XM
+    P1 = 10.0D0**(NINT(LOG10(T_NEW) - SQR1) - 1)
+    T_NEW = AINT(T_NEW / P1 + 0.55D0) * P1
 
-            !           Estimate costs
-            cost1 = krylov_cost(t_now, t_out, t_opt, m, n, hnorm)
-            cost2 = krylov_cost(t_now, t_out, t_step, m_opt, n, hnorm)
+    !     INITIALIZE THE FSP PARAMETERS
+    N_NOW = FSP%SIZE
+    IEXPAND = 0
+    WSUM_OLD = 1.0D0
+    IREJECTFSP = 0
+    DROPTOL = 1.0D-8
 
-            IF (cost1<=cost2) THEN
-                t_new = t_opt
-                p1 = 10.0d0**(NINT(LOG10(t_new) - sqr1) - 1)
-                t_new = AINT(t_new / p1) * p1
-                m_new = m
-                m_changed = .FALSE.
-            ELSE
-                m_new = m_opt
-                t_new = t_step
-                m_changed = .TRUE.
-            ENDIF
-        ENDIF
-        !     If the Krylov step error is not acceptable, reject the stepsize
-        IF ((k1.NE.0).AND.(omega>delta).AND.&
-                (mxreject==0.OR.ireject<mxreject)) THEN
-            IF (.NOT.m_changed) THEN
-                !                 Choose to change step size
-                t_step = MIN(t_out - t_now, &
-                        MAX(t_step / 5.0d0, &
-                                MIN(5.0d0 * t_step, t_new)))
-                p1 = 10.0d0**(NINT(LOG10(t_step) - sqr1) - 1)
-                t_step = AINT(t_step / p1 + 0.55d0) * p1
-                IF (itrace.NE.0) THEN
-                    PRINT*, 't_step =', t_old
-                    PRINT*, 'err_loc =', err_loc
-                    PRINT*, 'err_required =', delta * t_old * KryTol
-                    PRINT*, 'stepsize rejected, down to:', t_step
-                ENDIF
-                ireject = ireject + 1
-                nreject = nreject + 1
-                IF ((mxreject.NE.0).AND.(ireject>mxreject)) THEN
-                    PRINT*, 'Failure in DGEXPV: ---'
-                    PRINT*, 'The requested tolerance is too high.'
-                    PRINT*, 'Rerun with a smaller value.'
-                    iflag = 2
-                    RETURN
-                ENDIF
-                go to 401
-            ELSE
-                !                 Choose to change dimension
-                nreject = nreject + 1
-                imreject = imreject + 1
-                m = m_new
-                htmp(1:ifree - ih + 1) = wsp(ih:ifree)
-                ih_old = ih
-                mbrkdwn = m
-                k1 = 2
-                mh = m + 2
-                iv = 1
-                ih = iv + n * (m + 1) + n
-                ifree = ih + mh * mh
-                lfree = lwsp - ifree + 1
-                t_step = MIN(t_out - t_now, t_new)
-                DO i = 1, mh * mh
-                    wsp(ih + i - 1) = 0.0d0
+    NNZ = (MODEL%NREACTIONS + 1) * FSP%SIZE
+
+    !     PARAMETERS FOR THE KRYLOV SUBSPACE ADAPTIVITY,
+    !     BASED ON NIESEN AND WRIGHT
+    IMREJECT = 0
+    JOLD = 1
+    M_NEW = M
+    ORDEROLD = .TRUE.
+    KESTOLD = .TRUE.
+
+100 IF (T_NOW >= T_OUT) GOTO 500
+    !     FIND THE REAL STEPSIZE
+    T_STEP = MIN(T_OUT - T_NOW, T_NEW)
+    !     COMPUTE THE ARNOLDI MATRICES H_M AND V_M
+    N = N_NOW
+    M = MIN(N - 1, M_NEW)
+    MBRKDWN = M
+    !     FIND POINTERS INTO THE WORKSPACE
+    K1 = 2
+    MH = M + 2
+    IV = 1
+    IH = IV + N * (M + 1) + N
+    IFREE = IH + MH * MH
+    LFREE = LWSP - IFREE + 1
+
+    NSTEP = NSTEP + 1
+
+    P1 = 1.0D0 / BETA
+    DO I = 1, N
+       WSP(IV + I - 1) = P1 * W(I)
+    ENDDO
+    DO I = 1, MH * MH
+       WSP(IH + I - 1) = 0.0D0
+    ENDDO
+
+    IREJECT = 0
+    !     START THE STOPWATCH
+    IF (ITRACE.NE.0) THEN
+       PRINT*, 'BEGINNING IOP...'
+    ENDIF
+101 CONTINUE
+    J1V = IV + JOLD * N
+    DO 200 J = JOLD, M
+       NMULT = NMULT + 1
+       CALL FMATVEC(WSP(J1V - N), WSP(J1V), FSP%MATRIX)
+       IF (QIOP>0)    ISTART = MAX(1, J - QIOP + 1)
+       DO I = ISTART, J
+          HIJ = DDOT(N, WSP(IV + (I - 1) * N), 1, WSP(J1V), 1)
+          CALL DAXPY(N, -HIJ, WSP(IV + (I - 1) * N), 1, WSP(J1V), 1)
+          WSP(IH + (J - 1) * MH + I - 1) = HIJ
+       ENDDO
+       HJ1J = DNRM2(N, WSP(J1V), 1)
+       !           IF A `HAPPY BREAKDOWN' OCCURS, GO STRAIGHTFORWARD AT THE END
+       IF (HJ1J<=BREAK_TOL) THEN
+          K1 = 0
+          IBRKFLAG = 1
+          MBRKDWN = J
+          TBRKDWN = T_NOW
+          T_STEP = T_OUT - T_NOW
+          GO TO 300
+       END IF
+       WSP(IH + (J - 1) * MH + J) = HJ1J
+       CALL DSCAL(N, 1.0D0 / HJ1J, WSP(J1V), 1)
+       J1V = J1V + N
+200    CONTINUE
+       NMULT = NMULT + 1
+       CALL FMATVEC(WSP(J1V - N), WSP(J1V), FSP%MATRIX)
+       AVNORM = DNRM2(N, WSP(J1V), 1)
+       !     SET 1 FOR THE 2-CORRECTED SCHEME
+300    CONTINUE
+       WSP(IH + M * MH + M + 1) = 1.0D0
+401    CONTINUE
+
+       !     COMPUTE W=BETA*V*EXP(T_STEP*H)*E1...
+       NEXPH = NEXPH + 1
+       MX = MBRKDWN + K1
+       IF (IDEG.NE.0) THEN
+          !           BY THE IRREDUCIBLE RATIONAL PADE APPROXIMATION...
+          CALL DGPADMNORM(IDEG, MX, SGN * T_STEP, WSP(IH), MH, &
+               WSP(IFREE), LFREE, IWSP, IEXPH, NS, IFLAG, HNORM)
+          IEXPH = IFREE + IEXPH - 1
+          NSCALE = NSCALE + NS
+       ELSE
+          !           OR THE UNIFORM RATIONAL CHEBYSHEV APPROXIMATION
+          IEXPH = IFREE
+          DO I = 1, MX
+             WSP(IEXPH + I - 1) = 0.0D0
+          ENDDO
+          WSP(IEXPH) = 1.0D0
+          CALL DGCHBV(MX, SGN * T_STEP, WSP(IH), MH, &
+               WSP(IEXPH), WSP(IFREE + MX))
+       ENDIF
+402    CONTINUE
+       !     ESTIMATE THE ERROR
+       IF (K1==0) THEN
+          ERR_LOC = KRYTOL
+       ELSE
+          P1 = ABS(WSP(IEXPH + M)) * BETA
+          P2 = ABS(WSP(IEXPH + M + 1)) * BETA * AVNORM
+          IF (P1>10.0D0 * P2) THEN
+             ERR_LOC = P2
+             XM = 1.0D0 / DBLE(M)
+          ELSE IF (P1>P2) THEN
+             ERR_LOC = (P1 * P2) / (P1 - P2)
+             XM = 1.0D0 / DBLE(M)
+          ELSE
+             ERR_LOC = P1
+             XM = 1.0D0 / DBLE(M - 1)
+          END IF
+       ENDIF
+       !     REDUCE THE STEPSIZE IF THE ERROR IS OUT OF BOUND
+       IF (ISNAN(ERR_LOC)) THEN
+          T_STEP = T_STEP / 5.0D0
+          GO TO 401
+       ENDIF
+
+       !     FIND THE RATIO OF ERROR PER UNIT STEP
+       OMEGA_OLD = OMEGA
+       OMEGA = ERR_LOC / (KRYTOL * T_STEP)
+       !     ESTIMATE THE ORDER
+       IF ((M==M_OLD).AND.(T_STEP.NE.T_OLD).AND.(IREJECT>=1)) THEN
+          ORDER = MAX(1.0D0, LOG(OMEGA / OMEGA_OLD) / LOG(T_STEP / T_OLD))
+          ORDEROLD = .FALSE.
+       ELSE IF (ORDEROLD.OR.IREJECT==0) THEN
+          ORDER = DBLE(M) / 4.0D0
+          ORDEROLD = .TRUE.
+       ELSE
+          ORDEROLD = .TRUE.
+       ENDIF
+       !     ESTIMATE KAPPA
+       IF ((M.NE.M_OLD).AND.(T_STEP==T_OLD).AND.(IREJECT>=1)) THEN
+          K_FACTOR = MAX(1.1D0, (OMEGA / OMEGA_OLD)**(1.0D0 / (M_OLD - M)))
+          KESTOLD = .FALSE.
+       ELSE IF (KESTOLD .OR. IREJECT==0) THEN
+          KESTOLD = .TRUE.
+          K_FACTOR = 2.0D0
+       ELSE
+          KESTOLD = .TRUE.
+       ENDIF
+       !     RECORD THE OLD STEP SIZE AND KRYLOV DIMENSION
+       T_OLD = T_STEP
+       M_OLD = M
+       !     SUGGEST NEW STEP SIZE AND KRYLOV DIMENSION
+       IF ((M==M_MAX).AND.(OMEGA>DELTA).OR.(IMREJECT>4)) THEN
+          T_NEW = MIN(T_OUT - T_NOW, &
+               MAX(T_STEP / 5.0D0, &
+               MIN(5.0D0 * T_STEP, &
+               GAMMA * T_STEP * OMEGA**(-1.0D0 / ORDER))))
+          P1 = 10.0D0**(NINT(LOG10(T_NEW) - SQR1) - 1)
+          T_NEW = AINT(T_NEW / P1) * P1
+          M_CHANGED = .FALSE.
+       ELSE
+          !           COMPUTE OPTIONS FOR THE NEW STEP SIZE AND KRYLOV DIMENSION
+          T_OPT = MIN(T_OUT - T_NOW, &
+               MAX(T_STEP / 5.0D0, &
+               MIN(5.0D0 * T_STEP, &
+               GAMMA * T_STEP * OMEGA**(-1.0D0 / ORDER))))
+          M_OPT = MIN(MAX(M_MIN, 3 * M / 4, &
+               M + CEILING(LOG(OMEGA) / LOG(K_FACTOR))), &
+               M_MAX, &
+               CEILING(4.0D0 * M / 3.0D0) + 1)
+
+          !           ESTIMATE COSTS
+          COST1 = KRYLOV_COST(T_NOW, T_OUT, T_OPT, M, N, HNORM)
+          COST2 = KRYLOV_COST(T_NOW, T_OUT, T_STEP, M_OPT, N, HNORM)
+
+          IF (COST1<=COST2) THEN
+             T_NEW = T_OPT
+             P1 = 10.0D0**(NINT(LOG10(T_NEW) - SQR1) - 1)
+             T_NEW = AINT(T_NEW / P1) * P1
+             M_NEW = M
+             M_CHANGED = .FALSE.
+          ELSE
+             M_NEW = M_OPT
+             T_NEW = T_STEP
+             M_CHANGED = .TRUE.
+          ENDIF
+       ENDIF
+       !     IF THE KRYLOV STEP ERROR IS NOT ACCEPTABLE, REJECT THE STEPSIZE
+       IF ((K1.NE.0).AND.(OMEGA>DELTA).AND.&
+            (MXREJECT==0.OR.IREJECT<MXREJECT)) THEN
+          IF (.NOT.M_CHANGED) THEN
+             !                 CHOOSE TO CHANGE STEP SIZE
+             T_STEP = MIN(T_OUT - T_NOW, &
+                  MAX(T_STEP / 5.0D0, &
+                  MIN(5.0D0 * T_STEP, T_NEW)))
+             P1 = 10.0D0**(NINT(LOG10(T_STEP) - SQR1) - 1)
+             T_STEP = AINT(T_STEP / P1 + 0.55D0) * P1
+             IF (ITRACE.NE.0) THEN
+                PRINT*, 'T_STEP =', T_OLD
+                PRINT*, 'ERR_LOC =', ERR_LOC
+                PRINT*, 'ERR_REQUIRED =', DELTA * T_OLD * KRYTOL
+                PRINT*, 'STEPSIZE REJECTED, DOWN TO:', T_STEP
+             ENDIF
+             IREJECT = IREJECT + 1
+             NREJECT = NREJECT + 1
+             IF ((MXREJECT.NE.0).AND.(IREJECT>MXREJECT)) THEN
+                PRINT*, 'FAILURE IN DGEXPV: ---'
+                PRINT*, 'THE REQUESTED TOLERANCE IS TOO HIGH.'
+                PRINT*, 'RERUN WITH A SMALLER VALUE.'
+                IFLAG = 2
+                RETURN
+             ENDIF
+             GO TO 401
+          ELSE
+             !                 CHOOSE TO CHANGE DIMENSION
+             NREJECT = NREJECT + 1
+             IMREJECT = IMREJECT + 1
+             M = M_NEW
+             HTMP(1:IFREE - IH + 1) = WSP(IH:IFREE)
+             IH_OLD = IH
+             MBRKDWN = M
+             K1 = 2
+             MH = M + 2
+             IV = 1
+             IH = IV + N * (M + 1) + N
+             IFREE = IH + MH * MH
+             LFREE = LWSP - IFREE + 1
+             T_STEP = MIN(T_OUT - T_NOW, T_NEW)
+             DO I = 1, MH * MH
+                WSP(IH + I - 1) = 0.0D0
+             ENDDO
+             !                 COPY THE HESSENBERG MATRIX
+             DO J = 1, M_OLD
+                DO I = 1, J + 1
+                   WSP(IH + (J - 1) * (M + 2) + I - 1) = &
+                        HTMP(1 + (J - 1) * (M_OLD + 2) + I - 1)
                 ENDDO
-                !                 Copy the Hessenberg matrix
-                DO j = 1, m_old
-                    DO i = 1, j + 1
-                        wsp(ih + (j - 1) * (m + 2) + i - 1) = &
-                                htmp(1 + (j - 1) * (m_old + 2) + i - 1)
-                    ENDDO
-                ENDDO
-                !                 Only do Arnoldi from the m_old-th column
-                jold = m_old
-                IF (itrace.NE.0) THEN
-                    PRINT*, 'err_loc =', err_loc
-                    PRINT*, 'err_required =', delta * t_old * KryTol
-                    PRINT*, 'Dimension changed into m =', m
-                ENDIF
-                go to 101
-            ENDIF
-        ENDIF
-        imreject = 0
-        jold = 1
-        IF (err_loc<1.0d-16) t_new = MAX(t_new, 2.0d0 * t_step)
-        mx = mbrkdwn + MAX(0, k1 - 1)
-        irejectfsp = 0
+             ENDDO
+             !                 ONLY DO ARNOLDI FROM THE M_OLD-TH COLUMN
+             JOLD = M_OLD
+             IF (ITRACE.NE.0) THEN
+                PRINT*, 'ERR_LOC =', ERR_LOC
+                PRINT*, 'ERR_REQUIRED =', DELTA * T_OLD * KRYTOL
+                PRINT*, 'DIMENSION CHANGED INTO M =', M
+             ENDIF
+             GO TO 101
+          ENDIF
+       ENDIF
+       IMREJECT = 0
+       JOLD = 1
+       IF (ERR_LOC<1.0D-16) T_NEW = MAX(T_NEW, 2.0D0 * T_STEP)
+       MX = MBRKDWN + MAX(0, K1 - 1)
+       IREJECTFSP = 0
 
-        ! Ensure the FSP-like criteria
-        DO
-            !     Find w = beta*V*exp(t*H)*e1
-            CALL dgemv('n', n, mx, beta, wsp(iv), n, wsp(iexph), 1, 0.0d0, w, 1)
+       ! ENSURE THE FSP-LIKE CRITERIA
+       DO
+          !     FIND W = BETA*V*EXP(T*H)*E1
+          CALL DGEMV('N', N, MX, BETA, WSP(IV), N, WSP(IEXPH), 1, 0.0D0, W, 1)
 
-            !     Ensure FSP non-negativity and compute the probability sum
-            DO i = 1, fsp%size
-                IF (w(i)<0.0d0)      w(i) = 0.0d0
+          !     ENSURE FSP NON-NEGATIVITY AND COMPUTE THE PROBABILITY SUM
+          DO I = 1, FSP%SIZE
+             IF (W(I)<0.0D0)      W(I) = 0.0D0
+          ENDDO
+          WSUM = DASUM(FSP%SIZE, W, 1)
+
+          PRINT*, "WSUM= ", WSUM
+
+          ERROR = WSUM_OLD - WSUM
+          T_RATIO = (T_NOW + T_STEP) / T_OUT
+
+          !     ENSURE FSP-LIKE CRITERIA...
+          IF (WSUM >= (1.0D0 - FERRORBOUND(T_NOW + T_STEP))) THEN
+             EXIT
+          ELSE
+             IEXPAND = 1
+             IREJECTFSP = IREJECTFSP + 1
+
+             !           IF THE FSP HAS BEEN REJECTED TOO MANY TIMES, JUMPT TO SSA
+             !           LOOP TO EXPAND THE STATE SPACE
+             IF (IREJECTFSP>=5) THEN
+                W(1:N) = BETA * WSP(IV:IV + N - 1)
+                NSTEP = NSTEP - 1
+                T_SSA = T_NEW
+                GO TO 404
+             ELSEIF (IREJECTFSP==1) THEN
+                FSPORDER = 2
+             ELSE
+                FSPORDER = LOG(ERROR / ERROROLD) / &
+                     LOG(T_STEP / TAU_OLD) - 1.0D0
+             ENDIF
+
+             !           REDUCE THE TIME STEP
+             TFSP = GAMMA * T_STEP * (FSPTOL * T_STEP / (ERROR * T_OUT))**&
+                  (1.0D0 / (FSPORDER))
+             ERROROLD = ERROR
+             TAU_OLD = T_STEP
+
+             T_STEP = MIN(T_OUT - T_NOW, &
+                  MAX(T_STEP / 5.0D0, MIN(0.9D0 * T_STEP, TFSP)))
+             P1 = 10.0D0**(NINT(LOG10(T_STEP) - SQR1) - 1)
+             T_STEP = AINT(T_STEP / P1 + 0.55D0) * P1
+
+             NEXPH = NEXPH + 1
+             CALL DGPADM(IDEG, MX, SGN * T_STEP, WSP(IH), MH, &
+                  WSP(IFREE), LFREE, IWSP, IEXPH, NS, IFLAG)
+             IEXPH = IFREE + IEXPH - 1
+             NSCALE = NSCALE + NS
+          ENDIF
+       ENDDO
+
+       !     UPDATE THE TIME COVERED
+       T_NOW = T_NOW + T_STEP
+       WSUM_OLD = WSUM
+
+       !     DISPLAY INFORMATION ABOUT THE LAST SUCCESSFUL TIME STEP
+       IF (ITRACE.NE.0) CALL PRINT_STATS
+
+       !     IF THE INTEGRATION IS AT THE END TIME POINT, THEN THE ALGORITHM
+       !     IS FINISHED
+       IF (T_NOW>=T_OUT) GO TO 500
+
+       !     REDUCE THE STATE SPACE TO ONLY SUBSTANTIAL STATES
+       IF (NSTEP > 1 .AND. IEXPAND /= 1) THEN
+          DSUM = WSUM - (1.0D0 - FERRORBOUND(T_NOW))
+          IF (DSUM>0.0D0) CALL DROP_STATES(W, FSP, MODEL, DSUM, FMATVEC)
+       ENDIF
+
+       !-------------------------------------------STATE SPACE EXPANSION BY SSA
+       !-----------------------------IN THE CASE WHERE THE STEPSIZE WAS REDUCED
+404    CONTINUE
+
+       IF ((IEXPAND==1).AND.(T_NOW<T_OUT)) THEN
+
+          IF (NSTEP==1) T_NEW = T_STEP
+          T_SSA = MIN(T_NEW, T_OUT - T_NOW)
+
+          IF (ITRACE.NE.0) THEN
+             PRINT*, 'CALLING SSA'
+          ENDIF
+
+          ! EXTEND THE STATE SPACE BY SSA AND 1-STEP REACHABILITY
+          CALL SSA_EXTENDER(T_SSA, FSP, MODEL)
+          CALL ONESTEP_EXTENDER(FSP, MODEL)
+
+          IF (N_NOW>NFULL) N_NOW = NFULL
+          IEXPAND = 0
+
+       ENDIF
+
+       !     ESTIMATE THE NUMBER OF NONZERO ENTRIES IN CURRENT FSP MATRIX
+       NNZ = (MODEL%NREACTIONS + 1) * FSP%SIZE
+       !     ESTIMATE OTHER PARAMETERS
+       N_NOW = FSP%SIZE
+       BETA = DNRM2(N_NOW, W, 1)
+       HUMP = MAX(HUMP, BETA)
+       ERR_LOC = MAX(ERR_LOC, RNDOFF)
+       STEP_MIN = MIN(STEP_MIN, T_STEP)
+       STEP_MAX = MAX(STEP_MAX, T_STEP)
+       S_ERROR = S_ERROR + ERR_LOC
+       X_ERROR = MAX(X_ERROR, ERR_LOC)
+       P1 = 10.0D0**(NINT(LOG10(T_NEW) - SQR1) - 1)
+       T_NEW = AINT(T_NEW / P1 + 0.55D0) * P1
+       !     RETURN TO THE BEGINNING FOR THE NEXT TIME STEP
+       IF ((MXSTEP==0).OR.(NSTEP<MXSTEP)) GO TO 100
+       IFLAG = 1
+
+       !-------------------------------------------OUTPUT IMPORTANT INFORMATION
+500    CONTINUE
+       !     IN IWSP
+       IWSP(1) = NMULT
+       IWSP(2) = NEXPH
+       IWSP(3) = NSCALE
+       IWSP(4) = NSTEP
+       IWSP(5) = NREJECT
+       IWSP(6) = IBRKFLAG
+       IWSP(7) = MBRKDWN
+       !     IN WSP
+       WSP(1) = STEP_MIN
+       WSP(2) = STEP_MAX
+       WSP(3) = 0.0D0
+       WSP(4) = 0.0D0
+       WSP(5) = X_ERROR
+       WSP(6) = S_ERROR
+       WSP(7) = TBRKDWN
+       WSP(8) = SGN * T_NOW
+       WSP(9) = HUMP / VNORM
+       WSP(10) = BETA / VNORM
+     CONTAINS
+
+       !===========================COMPUTE THE MATRIX-VECTOR PRODUCT IN THE CME
+       SUBROUTINE FMATVEC(X, Y, MATRIX)
+         IMPLICIT NONE
+         !------------------------------------------------INPUT/OUTPUT PARAMETERS
+         !     VECTOR X
+         DOUBLE PRECISION :: X(*)
+         !     VECTOR Y=A*X, WHERE A IS THE FSP MATRIX
+         DOUBLE PRECISION :: Y(*)
+         !     CURRENT FSP MATRIX
+         TYPE(FSP_MATRIX) :: MATRIX
+         !--------------------------------------------PARAMETERS OF THE ALGORITHM
+         INTEGER :: I, J, K, N, BW
+         !----------------------------------------------------------COMPUTE Y=A*X
+         !     FIND THE SIZE OF THE MATRIX
+         N = MATRIX%SIZE
+         BW = SIZE(MATRIX%ADJ, DIM = 1)
+         !     INITIALIZE VECTOR Y
+         DO I = 1, N
+            Y(I) = 0.0D0
+         ENDDO
+
+         !     COMPUTE Y=A*X
+         DO I = 1, N
+            DO J = 1, BW
+               K = MATRIX%ADJ(J, I)
+               IF (K>=1) THEN
+                  Y(K) = Y(K) + MATRIX%OFFDIAG(J, I) * X(I)
+               ENDIF
             ENDDO
-            wsum = dasum(fsp%size, w, 1)
+            Y(I) = Y(I) - MATRIX%DIAG(I) * X(I)
+         ENDDO
+       END SUBROUTINE FMATVEC
 
-            PRINT*, "wsum= ", wsum
+       DOUBLE PRECISION FUNCTION FERRORBOUND(TX)
+         IMPLICIT NONE
+         !-------------------------------------------------------INPUT PARAMETERS
+         !     A TIME INTERVAL
+         DOUBLE PRECISION, INTENT(IN) :: TX
+         !-----------------COMPUTE THE FSP ERROR TOLERANCE FOR THIS TIME INTERVAL
+         FERRORBOUND = TX * FSPTOL / T_OUT
+       END FUNCTION FERRORBOUND
 
-            error = wsum_old - wsum
-            t_ratio = (t_now + t_step) / t_out
+       DOUBLE PRECISION FUNCTION KRYLOV_COST(T_NOW, T_OUT, TAU, M, N, HNORM)
+         ! ESTIMATE THE COST OF THE KRYLOV APPROXIMATION ASSOCIATED WITH A PARTICULAR CHOICE OF STEPSIZE AND BASIS SIZE.
+         ! T_NOW: CURRENT TIME
+         ! T_OUT: FINAL TIME
+         ! TAU: STEPSIZE
+         ! M: KRYLOV BASIS SIZE
+         ! N: SOLUTION VECTOR LENGTH
+         ! HNORM: NORM OF THE HESSENBERG MATRIX COMPUTED FROM THE LAST TIME STEP
+         IMPLICIT NONE
 
-            !     Ensure FSP-like criteria...
-            IF (wsum >= (1.0d0 - ferrorbound(t_now + t_step))) THEN
-                EXIT
-            ELSE
-                iexpand = 1
-                irejectfsp = irejectfsp + 1
+         INTEGER, INTENT(IN) :: M, N
+         DOUBLE PRECISION, INTENT(IN) :: TAU, HNORM, T_NOW, T_OUT
+         DOUBLE PRECISION :: NOM
 
-                !           If the FSP has been rejected too many times, jumpt to SSA
-                !           loop to expand the state space
-                IF (irejectfsp>=5) THEN
-                    w(1:n) = beta * wsp(iv:iv + n - 1)
-                    nstep = nstep - 1
-                    t_ssa = t_new
-                    go to 404
-                ELSEIF (irejectfsp==1) THEN
-                    fsporder = 2
-                ELSE
-                    fsporder = LOG(error / errorold) / &
-                            LOG(t_step / tau_old) - 1.0d0
-                ENDIF
+         NOM = 25.0D0 / 3.0D0 + &
+              MAX(0, 2 + INT(LOG(TAU * HNORM) / LOG(2.0D0)))
+         KRYLOV_COST = NINT((T_OUT - T_NOW) / TAU) * &
+              (2 * (M + 1) * NNZ + &
+              (5 * M + 4 * QIOP * M + 2 * QIOP - 2 * QIOP * QIOP + 7) * N + &
+              2 * NOM * (M + 2) * (M + 2) * (M + 2))
 
-                !           Reduce the time step
-                tfsp = gamma * t_step * (FSPTol * t_step / (error * t_out))**&
-                        (1.0d0 / (fsporder))
-                errorold = error
-                tau_old = t_step
+       END FUNCTION KRYLOV_COST
 
-                t_step = MIN(t_out - t_now, &
-                        MAX(t_step / 5.0d0, MIN(0.9d0 * t_step, tfsp)))
-                p1 = 10.0d0**(NINT(LOG10(t_step) - sqr1) - 1)
-                t_step = AINT(t_step / p1 + 0.55d0) * p1
+       SUBROUTINE PRINT_STATS
+         IMPLICIT NONE
 
-                nexph = nexph + 1
-                CALL dgpadm(ideg, mx, sgn * t_step, wsp(ih), mh, &
-                        wsp(ifree), lfree, iwsp, iexph, ns, iflag)
-                iexph = ifree + iexph - 1
-                nscale = nscale + ns
-            ENDIF
-        ENDDO
+         PRINT*, 'TIMESTEP', NSTEP, '-------------------------------'
+         PRINT*, 'FSP SIZE         =', FSP%SIZE
+         PRINT*, 'STEP_SIZE        =', T_STEP
+         PRINT*, 'NEXT_STEP        =', T_NEW
+         PRINT*, 'T_NOW            =', T_NOW
+         PRINT*, 'KRYLOV DIMENSION =', M
 
-        !     Update the time covered
-        t_now = t_now + t_step
-        wsum_old = wsum
+       END SUBROUTINE PRINT_STATS
 
-        !     Display information about the last successful time step
-        IF (itrace.NE.0) CALL print_stats
+     END SUBROUTINE DGEXPV_FSP
 
-        !     If the integration is at the end time point, then the algorithm
-        !     is finished
-        IF (t_now>=t_out) go to 500
-
-        !     Reduce the state space to only substantial states
-        IF (nstep > 1 .AND. iexpand /= 1) THEN
-            dsum = wsum - (1.0d0 - ferrorbound(t_now))
-            IF (dsum>0.0d0) CALL drop_states(w, fsp, model, dsum, fmatvec)
-        ENDIF
-
-        !-------------------------------------------State space expansion by SSA
-        !-----------------------------in the case where the stepsize was reduced
-        404    CONTINUE
-
-        IF ((iexpand==1).AND.(t_now<t_out)) THEN
-
-            IF (nstep==1) t_new = t_step
-            t_ssa = MIN(t_new, t_out - t_now)
-
-            IF (itrace.NE.0) THEN
-                PRINT*, 'calling SSA'
-            ENDIF
-
-            ! Extend the state space by SSA and 1-step reachability
-            CALL SSA_extender(t_ssa, fsp, model)
-            CALL onestep_extender(fsp, model)
-
-            IF (n_now>nfull) n_now = nfull
-            iexpand = 0
-
-        ENDIF
-
-        !     Estimate the number of nonzero entries in current FSP matrix
-        nnz = (model%nreactions + 1) * fsp%size
-        !     Estimate other parameters
-        n_now = fsp%size
-        beta = dnrm2(n_now, w, 1)
-        hump = MAX(hump, beta)
-        err_loc = MAX(err_loc, rndoff)
-        step_min = MIN(step_min, t_step)
-        step_max = MAX(step_max, t_step)
-        s_error = s_error + err_loc
-        x_error = MAX(x_error, err_loc)
-        p1 = 10.0d0**(NINT(LOG10(t_new) - sqr1) - 1)
-        t_new = AINT(t_new / p1 + 0.55d0) * p1
-        !     Return to the beginning for the next time step
-        IF ((mxstep==0).OR.(nstep<mxstep)) go to 100
-        iflag = 1
-
-        !-------------------------------------------Output important information
-        500    CONTINUE
-        !     In iwsp
-        iwsp(1) = nmult
-        iwsp(2) = nexph
-        iwsp(3) = nscale
-        iwsp(4) = nstep
-        iwsp(5) = nreject
-        iwsp(6) = ibrkflag
-        iwsp(7) = mbrkdwn
-        !     In wsp
-        wsp(1) = step_min
-        wsp(2) = step_max
-        wsp(3) = 0.0d0
-        wsp(4) = 0.0d0
-        wsp(5) = x_error
-        wsp(6) = s_error
-        wsp(7) = tbrkdwn
-        wsp(8) = sgn * t_now
-        wsp(9) = hump / vnorm
-        wsp(10) = beta / vnorm
-    CONTAINS
-
-        !===========================Compute the matrix-vector product in the CME
-        SUBROUTINE fmatvec(x, y, matrix)
-            IMPLICIT NONE
-            !------------------------------------------------Input/output parameters
-            !     Vector x
-            DOUBLE PRECISION :: x(*)
-            !     Vector y=A*x, where A is the FSP matrix
-            DOUBLE PRECISION :: y(*)
-            !     Current FSP matrix
-            TYPE(fsp_matrix) :: matrix
-            !--------------------------------------------Parameters of the algorithm
-            INTEGER :: i, j, k, n, bw
-            !----------------------------------------------------------Compute y=A*x
-            !     Find the size of the matrix
-            n = matrix%size
-            bw = SIZE(matrix%adj, dim = 1)
-            !     Initialize vector y
-            DO i = 1, n
-                y(i) = 0.0d0
-            ENDDO
-
-            !     Compute y=A*x
-            DO i = 1, n
-                DO j = 1, bw
-                    k = matrix%adj(j, i)
-                    IF (k>=1) THEN
-                        y(k) = y(k) + matrix%offdiag(j, i) * x(i)
-                    ENDIF
-                ENDDO
-                y(i) = y(i) - matrix%diag(i) * x(i)
-            ENDDO
-        END SUBROUTINE fmatvec
-
-        DOUBLE PRECISION FUNCTION ferrorbound(tx)
-            IMPLICIT NONE
-            !-------------------------------------------------------Input parameters
-            !     A time interval
-            DOUBLE PRECISION, INTENT(in) :: tx
-            !-----------------Compute the FSP error tolerance for this time interval
-            ferrorbound = tx * FSPTol / t_out
-        END FUNCTION ferrorbound
-
-        DOUBLE PRECISION FUNCTION krylov_cost(t_now, t_out, tau, m, n, hnorm)
-            ! Estimate the cost of the Krylov approximation associated with a particular choice of stepsize and basis size.
-            ! t_now: current time
-            ! t_out: final time
-            ! tau: stepsize
-            ! m: Krylov basis size
-            ! n: solution vector length
-            ! hnorm: norm of the Hessenberg matrix computed from the last time step
-            IMPLICIT NONE
-
-            INTEGER, INTENT(IN) :: m, n
-            DOUBLE PRECISION, INTENT(IN) :: tau, hnorm, t_now, t_out
-            DOUBLE PRECISION :: nom
-
-            nom = 25.0d0 / 3.0d0 + &
-                    MAX(0, 2 + INT(LOG(tau * hnorm) / LOG(2.0d0)))
-            krylov_cost = NINT((t_out - t_now) / tau) * &
-                    (2 * (m + 1) * nnz + &
-                            (5 * m + 4 * qiop * m + 2 * qiop - 2 * qiop * qiop + 7) * n + &
-                            2 * nom * (m + 2) * (m + 2) * (m + 2))
-
-        END FUNCTION
-
-        SUBROUTINE print_stats
-            IMPLICIT NONE
-
-            PRINT*, 'timestep', nstep, '-------------------------------'
-            PRINT*, 'FSP size         =', fsp%size
-            PRINT*, 'step_size        =', t_step
-            PRINT*, 'next_step        =', t_new
-            PRINT*, 't_now            =', t_now
-            PRINT*, 'Krylov dimension =', m
-
-        END SUBROUTINE print_stats
-
-    END SUBROUTINE dgexpv_fsp
-
-END MODULE KrylovSolver
+   END MODULE KRYLOVSOLVER

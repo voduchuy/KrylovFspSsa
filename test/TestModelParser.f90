@@ -1,104 +1,104 @@
-PROGRAM TestModelParser
+PROGRAM TESTMODELPARSER
 
-  ! Test inputting the model from file using model_manager module
+  ! TEST INPUTTING THE MODEL FROM FILE USING MODEL_MANAGER MODULE
 
-  USE ModelModule
+  USE MODELMODULE
   IMPLICIT NONE
 
-  TYPE (cme_model) :: model, model2
+  TYPE (CME_MODEL) :: MODEL, MODEL2
 
-  INTEGER :: i, j, r
-  DOUBLE PRECISION :: p1, p2, error
+  INTEGER :: I, J, R
+  DOUBLE PRECISION :: P1, P2, ERROR
 
-  CALL model%load('models/toggle_test_model.input')
+  CALL MODEL%LOAD('MODELS/TOGGLE_TEST_MODEL.INPUT')
 
-  CALL model%reset_parameters((/5000.0d0, 1600.d0, 1.0d0, 1.0d0/))
+  CALL MODEL%RESET_PARAMETERS((/5000.0D0, 1600.D0, 1.0D0, 1.0D0/))
 
-  WRITE (*,*) 'Model loaded.'
-  WRITE (*,*) 'Number of species: ',model%nspecies
-  WRITE (*,*) 'Species names: ', model%species_names
-  WRITE (*,*) 'Number of parameters:', model%nparameters
-  WRITE (*,*) 'Parameter values:', model%parameter_val
-  WRITE (*,*) 'Stoichiometry:'
-  DO i = 1,model%nspecies
-     DO j = 1, model%nreactions
-        WRITE (*,fmt = '(I2 4X)',advance='no') model%stoichiometry(i,j)
+  WRITE (*,*) 'MODEL LOADED.'
+  WRITE (*,*) 'NUMBER OF SPECIES: ',MODEL%NSPECIES
+  WRITE (*,*) 'SPECIES NAMES: ', MODEL%SPECIES_NAMES
+  WRITE (*,*) 'NUMBER OF PARAMETERS:', MODEL%NPARAMETERS
+  WRITE (*,*) 'PARAMETER VALUES:', MODEL%PARAMETER_VAL
+  WRITE (*,*) 'STOICHIOMETRY:'
+  DO I = 1,MODEL%NSPECIES
+     DO J = 1, MODEL%NREACTIONS
+        WRITE (*,FMT = '(I2 4X)',ADVANCE='NO') MODEL%STOICHIOMETRY(I,J)
      ENDDO
      WRITE (*,*) ''
   END DO
 
 
-  error = 0.0d0
-  ! Now test the accuracy of the read-from-file propensities
-  DO i = 1, 50
-     DO j = 1,50
-        DO r = 1, model%nreactions
-           p1 = prop((/ i, j /), r, (/0d0 , 0d0/))
-           p2 = model%propensity((/i, j/), r)
-           error = error + ABS(p1-p2)
-           WRITE (*, 201) i, j, r, p1, p2, ABS(p1-p2)
-201        FORMAT (1X, 'ie=', I4,2X, 'j=', I4, 2X, 'r=',I4,2X, 'p1=', E9.2, 2X, 'p2=', E9.2, 2X, '|p2-p1|=',E9.2)
+  ERROR = 0.0D0
+  ! NOW TEST THE ACCURACY OF THE READ-FROM-FILE PROPENSITIES
+  DO I = 1, 50
+     DO J = 1,50
+        DO R = 1, MODEL%NREACTIONS
+           P1 = PROP((/ I, J /), R, (/0D0 , 0D0/))
+           P2 = MODEL%PROPENSITY((/I, J/), R)
+           ERROR = ERROR + ABS(P1-P2)
+           WRITE (*, 201) I, J, R, P1, P2, ABS(P1-P2)
+201        FORMAT (1X, 'IE=', I4,2X, 'J=', I4, 2X, 'R=',I4,2X, 'P1=', E9.2, 2X, 'P2=', E9.2, 2X, '|P2-P1|=',E9.2)
         ENDDO
      ENDDO
   ENDDO
 
-  PRINT*,'Propensity testing completed for model 1. Accumulated error = ',error
+  PRINT*,'PROPENSITY TESTING COMPLETED FOR MODEL 1. ACCUMULATED ERROR = ',ERROR
 
 
-  CALL model2%load('models/toggle_test_model.input')
-  CALL model2%reset_parameters((/5000.0d0, 1600.d0, 1.0d0, 1.0d0/))
+  CALL MODEL2%LOAD('MODELS/TOGGLE_TEST_MODEL.INPUT')
+  CALL MODEL2%RESET_PARAMETERS((/5000.0D0, 1600.D0, 1.0D0, 1.0D0/))
 
-  WRITE (*,*) 'Model loaded.'
-  WRITE (*,*) 'Number of species: ',model2%nspecies
-  WRITE (*,*) 'Species names: ', model2%species_names
-  WRITE (*,*) 'Number of parameters:', model2%nparameters
-  WRITE (*,*) 'Parameter values:', model2%parameter_val
-  WRITE (*,*) 'Stoichiometry:'
-  DO i = 1,model2%nspecies
-     DO j = 1, model2%nreactions
-        WRITE (*,fmt = '(I2 4X)',advance='no') model2%stoichiometry(i,j)
+  WRITE (*,*) 'MODEL LOADED.'
+  WRITE (*,*) 'NUMBER OF SPECIES: ',MODEL2%NSPECIES
+  WRITE (*,*) 'SPECIES NAMES: ', MODEL2%SPECIES_NAMES
+  WRITE (*,*) 'NUMBER OF PARAMETERS:', MODEL2%NPARAMETERS
+  WRITE (*,*) 'PARAMETER VALUES:', MODEL2%PARAMETER_VAL
+  WRITE (*,*) 'STOICHIOMETRY:'
+  DO I = 1,MODEL2%NSPECIES
+     DO J = 1, MODEL2%NREACTIONS
+        WRITE (*,FMT = '(I2 4X)',ADVANCE='NO') MODEL2%STOICHIOMETRY(I,J)
      ENDDO
      WRITE (*,*) ''
   END DO
-  model2%customprop=>prop
-  error = 0.0d0
-  ! Now test the accuracy of the read-from-file propensities
-  DO i = 1, 50
-     DO j = 1,50
-        DO r = 1, model2%nreactions
-           p1 = prop( (/i, j /),r)
-           p2 = model2%propensity((/i, j/), r)
-           error = error + ABS(p1-p2)
-           WRITE (*, 201) i, j, r, p1, p2, ABS(p1-p2)
+  MODEL2%CUSTOMPROP=>PROP
+  ERROR = 0.0D0
+  ! NOW TEST THE ACCURACY OF THE READ-FROM-FILE PROPENSITIES
+  DO I = 1, 50
+     DO J = 1,50
+        DO R = 1, MODEL2%NREACTIONS
+           P1 = PROP( (/I, J /),R)
+           P2 = MODEL2%PROPENSITY((/I, J/), R)
+           ERROR = ERROR + ABS(P1-P2)
+           WRITE (*, 201) I, J, R, P1, P2, ABS(P1-P2)
         ENDDO
      ENDDO
   ENDDO
 
-  PRINT*,'Propensity testing completed for model 2. Accumulated error = ',error
+  PRINT*,'PROPENSITY TESTING COMPLETED FOR MODEL 2. ACCUMULATED ERROR = ',ERROR
 
 CONTAINS
-  DOUBLE PRECISION FUNCTION prop(state, reaction, parameters)
-    ! propensity function for the toggle switch model
+  DOUBLE PRECISION FUNCTION PROP(STATE, REACTION, PARAMETERS)
+    ! PROPENSITY FUNCTION FOR THE TOGGLE SWITCH MODEL
     IMPLICIT NONE
-    INTEGER, INTENT(in) :: state(:), reaction
-    DOUBLE PRECISION, INTENT(IN), OPTIONAL :: parameters(:)
-    DOUBLE PRECISION c
-    !------Generate individual values of propensity functions--
+    INTEGER, INTENT(IN) :: STATE(:), REACTION
+    DOUBLE PRECISION, INTENT(IN), OPTIONAL :: PARAMETERS(:)
+    DOUBLE PRECISION C
+    !------GENERATE INDIVIDUAL VALUES OF PROPENSITY FUNCTIONS--
     !----------------------------------------------------------
-    SELECT CASE (reaction)
+    SELECT CASE (REACTION)
     CASE (1)
-       c=5000.0d0
-       prop=c/(1.0d0+DBLE(state(2))**(2.5d0))
+       C=5000.0D0
+       PROP=C/(1.0D0+DBLE(STATE(2))**(2.5D0))
     CASE (2)
-       c=1600.0d0
-       prop=c/(1.0d0+DBLE(state(1))**(1.5d0))
+       C=1600.0D0
+       PROP=C/(1.0D0+DBLE(STATE(1))**(1.5D0))
     CASE (3)
-       c=1.0d0*DBLE(state(1))
-       prop=c
+       C=1.0D0*DBLE(STATE(1))
+       PROP=C
     CASE (4)
-       c=1.0d0*DBLE(state(2))
-       prop=c
+       C=1.0D0*DBLE(STATE(2))
+       PROP=C
     END SELECT
-  END FUNCTION prop
+  END FUNCTION PROP
 
 END

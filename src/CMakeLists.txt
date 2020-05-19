@@ -16,4 +16,4 @@ add_subdirectory(model)
 add_subdirectory(state_space)
 add_subdirectory(fsp)
 
-add_library(KFSSA SHARED ${KFSSA_OBJS})
+add_library(KFSSA ${KFSSA_OBJS})

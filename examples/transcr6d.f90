@@ -33,7 +33,7 @@ PROGRAM solve_goutsias
 
     CALL RANDOM_SEED()
 
-    CALL model%init_mem(6, 10, 10)
+    CALL model%CREATE(6, 10, 10)
     CALL goutsias_stoich(model%stoichiometry)
     model%customprop => goutsias_propensity
     CALL model%reset_parameters(true_parameters)
@@ -42,8 +42,8 @@ PROGRAM solve_goutsias
     ! initialize the attributes of the fsp based on the underlying model
     tic = clock()
     write(*, *) 'Allocating memory for the FSP...'
-    CALL fsp_in%init(model)
-    CALL fsp%init(model)
+    CALL fsp_in%CREATE(model)
+    CALL fsp%CREATE(model)
     WRITE(*, fmt = 200) clock() - tic
 
     fsp_in%size = 1

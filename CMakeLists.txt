@@ -2,10 +2,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.7)
 
 PROJECT(KrylovFSPSSA LANGUAGES Fortran)
 enable_language(Fortran)
-set(CMAKE_Fortran_COMPILER gfortran)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_Fortran_FLAGS "-fpic -lblas -llapack -mcmodel=large")
+set(CMAKE_Fortran_FLAGS "-fpic -lblas -llapack")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

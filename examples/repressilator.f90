@@ -1,70 +1,70 @@
-! Created by ${USER_NAME} on 11/27/18.
+! CREATED BY ${USER_NAME} ON 11/27/18.
 
-PROGRAM solve_repress
-  !     Solve CME of the repressilator
-  USE StateSpace
-  USE KrylovSolver
+PROGRAM SOLVE_REPRESS
+  !     SOLVE CME OF THE REPRESSILATOR
+  USE STATESPACE
+  USE KRYLOVSOLVER
   IMPLICIT NONE
 
   INTERFACE
-     DOUBLE PRECISION FUNCTION clock()
-     END FUNCTION clock
+     DOUBLE PRECISION FUNCTION CLOCK()
+     END FUNCTION CLOCK
   END INTERFACE
 
-  DOUBLE PRECISION :: t = 10.0d0, exp_tol = 1.0d-14, fsp_tol = 1.0d-4
-  TYPE (cme_model) :: model
-  TYPE (finite_state_projection) :: fsp_in, fsp
-  DOUBLE PRECISION, DIMENSION(nmax) :: p0, p
-  DOUBLE PRECISION :: tic
-  INTEGER :: i
+  DOUBLE PRECISION :: T = 10.0D0, EXP_TOL = 1.0D-14, FSP_TOL = 1.0D-4
+  TYPE (CME_MODEL) :: MODEL
+  TYPE (FINITE_STATE_PROJECTION) :: FSP_IN, FSP
+  DOUBLE PRECISION, DIMENSION(NMAX) :: P0, P
+  DOUBLE PRECISION :: TIC
+  INTEGER :: I
 
   CALL RANDOM_SEED()
 
-  CALL model%init_mem(3, 6, 3)
-  model%stoichiometry = RESHAPE((/1,0,0,-1,0,0,0,1,0,0,-1,0,0,0,1,0,0,-1/), (/3,6/))
-  model%customprop => propensity
-  CALL model%reset_parameters([100.0D0, 25.0D0, 1.0D0])
-  model%loaded = .TRUE.
+  CALL MODEL%CREATE(3, 6, 3)
+  MODEL%STOICHIOMETRY = RESHAPE((/1,0,0,-1,0,0,0,1,0,0,-1,0,0,0,1,0,0,-1/), (/3,6/))
+  MODEL%CUSTOMPROP => PROPENSITY
+  CALL MODEL%RESET_PARAMETERS([100.0D0, 25.0D0, 1.0D0])
+  MODEL%LOADED = .TRUE.
 
-  ! initialize the attributes of the fsp based on the underlying model
-  tic = clock()
-  write(*,*) 'Allocating memory for the FSP...'
-  CALL fsp_in%init(model)
-  CALL fsp%init(model)
-  WRITE(*, fmt = 200) clock() - tic
+  ! INITIALIZE THE ATTRIBUTES OF THE FSP BASED ON THE UNDERLYING MODEL
+  TIC = CLOCK()
+  WRITE(*,*) 'ALLOCATING MEMORY FOR THE FSP...'
+  CALL FSP_IN%CREATE(MODEL)
+  CALL FSP%CREATE(MODEL)
+  WRITE(*, FMT = 200) CLOCK() - TIC
 
-  fsp_in%size = 1
-  fsp_in%state(:, 1) = [22, 0, 0]
-  p0(1) = 1.0
-  fsp_in%vector = p0
-  fsp = fsp_in
-  tic = clock()
-  write(*,*) 'Calling the solver...'
-  CALL cme_solve(model, t, fsp_in, fsp, fsp_tol, exp_tol, verbosity = 1)
-  WRITE(*, fmt = 200) clock() - tic
-200 FORMAT ('Elapsed time :', F10.2)
+  FSP_IN%SIZE = 1
+  FSP_IN%STATE(:, 1) = [22, 0, 0]
+  P0(1) = 1.0
+  FSP_IN%VECTOR = P0
+  FSP = FSP_IN
+  TIC = CLOCK()
+  WRITE(*,*) 'CALLING THE SOLVER...'
+  CALL CME_SOLVE(MODEL, T, FSP_IN, FSP, FSP_TOL, EXP_TOL, VERBOSITY = 1)
+  WRITE(*, FMT = 200) CLOCK() - TIC
+200 FORMAT ('ELAPSED TIME :', F10.2)
 
-  CALL fsp%clear()
-  CALL fsp_in%clear()
+  CALL FSP%CLEAR()
+  CALL FSP_IN%CLEAR()
 CONTAINS
-  DOUBLE PRECISION FUNCTION propensity(state, reaction, parameters)
-    INTEGER, INTENT(in) :: state(:), reaction
-    DOUBLE PRECISION, INTENT(in), OPTIONAL :: parameters(:)
+  DOUBLE PRECISION FUNCTION PROPENSITY(STATE, REACTION, PARAMETERS)
+    INTEGER, INTENT(IN) :: STATE(:), REACTION
+    DOUBLE PRECISION, INTENT(IN), OPTIONAL :: PARAMETERS(:)
 
-    SELECT CASE (reaction)
+    SELECT CASE (REACTION)
     CASE(1)
-       propensity = parameters(1)/(1d0 + parameters(2)*state(2)**6.0d0)
+       PROPENSITY = PARAMETERS(1)/(1D0 + PARAMETERS(2)*STATE(2)**6.0D0)
     CASE(2)
-       propensity = parameters(3)*state(1)
+       PROPENSITY = PARAMETERS(3)*STATE(1)
     CASE(3)
-      propensity = parameters(1)/(1d0 + parameters(2)*state(3)**6.0d0)
+      PROPENSITY = PARAMETERS(1)/(1D0 + PARAMETERS(2)*STATE(3)**6.0D0)
     CASE(4)
-      propensity = parameters(3)*state(2)
+      PROPENSITY = PARAMETERS(3)*STATE(2)
     CASE(5)
-      propensity = parameters(1)/(1d0 + parameters(2)*state(1)**6.0d0)
+      PROPENSITY = PARAMETERS(1)/(1D0 + PARAMETERS(2)*STATE(1)**6.0D0)
     CASE(6)
-      propensity = parameters(3)*state(3)
+      PROPENSITY = PARAMETERS(3)*STATE(3)
 
     END SELECT
-  END FUNCTION propensity
+  END FUNCTION PROPENSITY
 END PROGRAM

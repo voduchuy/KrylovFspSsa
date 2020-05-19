@@ -20,7 +20,7 @@ PROGRAM solve_toggle
 
   CALL RANDOM_SEED()
 
-  CALL model%init_mem(2, 4, 6)
+  CALL model%CREATE(2, 4, 6)
   model%stoichiometry = RESHAPE((/1,0,-1,0,0,1,0,-1/), (/2,4/))
   model%customprop => toggle_propensity
   CALL model%reset_parameters([1.0d0, 100.0d0, 1.0d0, 1.0d0, 100.0d0, 1.0d0])
@@ -34,8 +34,8 @@ PROGRAM solve_toggle
   ! initialize the attributes of the fsp based on the underlying model
   tic = clock()
   write(*,*) 'Allocating memory for the FSP...'
-  CALL fsp_in%init(model)
-  CALL fsp%init(model)
+  CALL fsp_in%CREATE(model)
+  CALL fsp%CREATE(model)
   WRITE(*, fmt = 200) clock() - tic
 
   fsp_in%size = 1

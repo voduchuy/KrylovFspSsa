@@ -21,8 +21,8 @@ PROGRAM TestSolverFromFile
     CALL model%load('toggle_model.input')
 
     ! initialize the attributes of the fsp based on the underlying model
-    CALL fsp_in%init(model)
-    CALL fsp%init(model)
+    CALL fsp_in%CREATE(model)
+    CALL fsp%CREATE(model)
 
     fsp_in%size = 1
     fsp_in%state(:, 1) = [0, 0]

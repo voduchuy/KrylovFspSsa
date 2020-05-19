@@ -1,74 +1,74 @@
-MODULE big_integer_module
+MODULE BIG_INTEGER_MODULE
 
-  !  Copyright (c) 1993-2002 Unicomp, Inc.
+  !  COPYRIGHT (C) 1993-2002 UNICOMP, INC.
   !
-  !  Developed at Unicomp, Inc.
+  !  DEVELOPED AT UNICOMP, INC.
   !
-  !  Permission to use, copy, modify, and distribute this
-  !  software is freely granted, provided that this notice
-  !  is preserved.
+  !  PERMISSION TO USE, COPY, MODIFY, AND DISTRIBUTE THIS
+  !  SOFTWARE IS FREELY GRANTED, PROVIDED THAT THIS NOTICE
+  !  IS PRESERVED.
 
-  !  The module named BIG_INTEGERS defines a new data type
-  !  BIG_INTEGER.  This data type represents nonnegative integers
-  !  up to 10**n - 1, where n is the parameter (named constant)
-  !  NR_OF_DECIMAL_DIGITS.  This value may be changed, but the
-  !  module must then be recompiled (it is not dynamic).
+  !  THE MODULE NAMED BIG_INTEGERS DEFINES A NEW DATA TYPE
+  !  BIG_INTEGER.  THIS DATA TYPE REPRESENTS NONNEGATIVE INTEGERS
+  !  UP TO 10**N - 1, WHERE N IS THE PARAMETER (NAMED CONSTANT)
+  !  NR_OF_DECIMAL_DIGITS.  THIS VALUE MAY BE CHANGED, BUT THE
+  !  MODULE MUST THEN BE RECOMPILED (IT IS NOT DYNAMIC).
 
-  !  The following operations are implemented.
-  !  b represents a big integer, c a character string,
-  !  and i an ordinary integer.
+  !  THE FOLLOWING OPERATIONS ARE IMPLEMENTED.
+  !  B REPRESENTS A BIG INTEGER, C A CHARACTER STRING,
+  !  AND I AN ORDINARY INTEGER.
 
-  !  integer, parameter :: nr_of_decimal_digits
+  !  INTEGER, PARAMETER :: NR_OF_DECIMAL_DIGITS
 
-  !  big (i)
-  !  big (c)
-  !  int (b)
-  !  int (c)
-  !  char (b)
-  !  char (i)
+  !  BIG (I)
+  !  BIG (C)
+  !  INT (B)
+  !  INT (C)
+  !  CHAR (B)
+  !  CHAR (I)
 
-  !  b = i
-  !  b = c
-  !  i = b
-  !  i = c
-  !  c = b
-  !  c = i
+  !  B = I
+  !  B = C
+  !  I = B
+  !  I = C
+  !  C = B
+  !  C = I
 
-  !  b ? i, i ? b, and b ? b, where ? is
+  !  B ? I, I ? B, AND B ? B, WHERE ? IS
   !    +, -, *, /,
-  !    <, <=, >, >=, ==, or /=
+  !    <, <=, >, >=, ==, OR /=
 
-  !  b ** i
+  !  B ** I
 
-  !  modulo (b, i)  [result is integer]
-  !  modulo (i, b)  [result is big_integer]
-  !  modulo (b, b)  [result is big_integer]
+  !  MODULO (B, I)  [RESULT IS INTEGER]
+  !  MODULO (I, B)  [RESULT IS BIG_INTEGER]
+  !  MODULO (B, B)  [RESULT IS BIG_INTEGER]
 
-  !  huge (b)
-  !  sqrt (b)
+  !  HUGE (B)
+  !  SQRT (B)
 
-  !  call print_big (b)
-  !  call random_number (b, low, high)
+  !  CALL PRINT_BIG (B)
+  !  CALL RANDOM_NUMBER (B, LOW, HIGH)
 
-  !  Many operations of the form b ? i, where i < base,
-  !  are implemented to be efficient as special cases.
+  !  MANY OPERATIONS OF THE FORM B ? I, WHERE I < BASE,
+  !  ARE IMPLEMENTED TO BE EFFICIENT AS SPECIAL CASES.
 
   IMPLICIT NONE
 
-  PUBLIC :: big
-  PUBLIC :: int
-  PUBLIC :: char
-  PUBLIC :: print_big
+  PUBLIC :: BIG
+  PUBLIC :: INT
+  PUBLIC :: CHAR
+  PUBLIC :: PRINT_BIG
   PUBLIC :: ASSIGNMENT (=)
   PUBLIC :: OPERATOR (+)
   PUBLIC :: OPERATOR (-)
   PUBLIC :: OPERATOR (*)
   PUBLIC :: OPERATOR (/)
   PUBLIC :: OPERATOR (**)
-  PUBLIC :: modulo
-  PUBLIC :: huge
-  PUBLIC :: sqrt
-  PUBLIC :: random_number
+  PUBLIC :: MODULO
+  PUBLIC :: HUGE
+  PUBLIC :: SQRT
+  PUBLIC :: RANDOM_NUMBER
   PUBLIC :: OPERATOR (==)
   PUBLIC :: OPERATOR (/=)
   PUBLIC :: OPERATOR (<=)
@@ -76,1103 +76,1103 @@ MODULE big_integer_module
   PUBLIC :: OPERATOR (>=)
   PUBLIC :: OPERATOR (>)
 
-  PRIVATE :: big_gets_int, &
-       big_int, &
-       big_gets_char, &
-       big_char, &
-       int_gets_big, &
-       int_big, &
-       int_gets_char, &
-       int_char, &
-       char_gets_big, &
-       char_big, &
-       char_gets_int, &
-       char_int
+  PRIVATE :: BIG_GETS_INT, &
+       BIG_INT, &
+       BIG_GETS_CHAR, &
+       BIG_CHAR, &
+       INT_GETS_BIG, &
+       INT_BIG, &
+       INT_GETS_CHAR, &
+       INT_CHAR, &
+       CHAR_GETS_BIG, &
+       CHAR_BIG, &
+       CHAR_GETS_INT, &
+       CHAR_INT
 
-  PRIVATE :: big_plus_int, &
-       int_plus_big, &
-       big_plus_big, &
-       big_minus_int, &
-       int_minus_big, &
-       big_minus_big, &
-       big_times_int, &
-       int_times_big, &
-       big_times_big, &
-       big_div_int, &
-       int_div_big, &
-       big_div_big, &
-       big_power_int, &
-       modulo_big_int, &
-       modulo_int_big, &
-       modulo_big_big
+  PRIVATE :: BIG_PLUS_INT, &
+       INT_PLUS_BIG, &
+       BIG_PLUS_BIG, &
+       BIG_MINUS_INT, &
+       INT_MINUS_BIG, &
+       BIG_MINUS_BIG, &
+       BIG_TIMES_INT, &
+       INT_TIMES_BIG, &
+       BIG_TIMES_BIG, &
+       BIG_DIV_INT, &
+       INT_DIV_BIG, &
+       BIG_DIV_BIG, &
+       BIG_POWER_INT, &
+       MODULO_BIG_INT, &
+       MODULO_INT_BIG, &
+       MODULO_BIG_BIG
 
-  PRIVATE :: big_eq_int, &
-       int_eq_big, &
-       big_eq_big, &
-       big_ne_int, &
-       int_ne_big, &
-       big_ne_big, &
-       big_le_int, &
-       int_le_big, &
-       big_le_big, &
-       big_ge_int, &
-       int_ge_big, &
-       big_ge_big, &
-       big_lt_int, &
-       int_lt_big, &
-       big_lt_big, &
-       big_gt_int, &
-       int_gt_big, &
-       big_gt_big
+  PRIVATE :: BIG_EQ_INT, &
+       INT_EQ_BIG, &
+       BIG_EQ_BIG, &
+       BIG_NE_INT, &
+       INT_NE_BIG, &
+       BIG_NE_BIG, &
+       BIG_LE_INT, &
+       INT_LE_BIG, &
+       BIG_LE_BIG, &
+       BIG_GE_INT, &
+       INT_GE_BIG, &
+       BIG_GE_BIG, &
+       BIG_LT_INT, &
+       INT_LT_BIG, &
+       BIG_LT_BIG, &
+       BIG_GT_INT, &
+       INT_GT_BIG, &
+       BIG_GT_BIG
 
-  PRIVATE :: huge_big, &
-       big_base_to_power, &
-       print_big_base, &
-       sqrt_big, &
-       msd, &
-       random_number_big
+  PRIVATE :: HUGE_BIG, &
+       BIG_BASE_TO_POWER, &
+       PRINT_BIG_BASE, &
+       SQRT_BIG, &
+       MSD, &
+       RANDOM_NUMBER_BIG
 
-  INTRINSIC :: char
-  INTRINSIC :: int
-  INTRINSIC :: modulo
-  INTRINSIC :: huge
-  INTRINSIC :: sqrt
-  INTRINSIC :: random_number
-  INTRINSIC :: radix
-  INTRINSIC :: digits
+  INTRINSIC :: CHAR
+  INTRINSIC :: INT
+  INTRINSIC :: MODULO
+  INTRINSIC :: HUGE
+  INTRINSIC :: SQRT
+  INTRINSIC :: RANDOM_NUMBER
+  INTRINSIC :: RADIX
+  INTRINSIC :: DIGITS
 
-  ! This indicates the maximum number of decimal digits
-  ! that a big integer may contain.
+  ! THIS INDICATES THE MAXIMUM NUMBER OF DECIMAL DIGITS
+  ! THAT A BIG INTEGER MAY CONTAIN.
 
-  INTEGER, PARAMETER, PUBLIC :: nr_of_decimal_digits = 150
+  INTEGER, PARAMETER, PUBLIC :: NR_OF_DECIMAL_DIGITS = 150
 
-  ! If the radix (returned by "radix(0)" of the integers on
-  ! your system is not 2 change the following constant to
-  ! the logarithm in the base 10 of the radix: log10(radix)
+  ! IF THE RADIX (RETURNED BY "RADIX(0)" OF THE INTEGERS ON
+  ! YOUR SYSTEM IS NOT 2 CHANGE THE FOLLOWING CONSTANT TO
+  ! THE LOGARITHM IN THE BASE 10 OF THE RADIX: LOG10(RADIX)
 
-  REAL, PARAMETER, PRIVATE :: log_base_10_of_radix = 0.30103
+  REAL, PARAMETER, PRIVATE :: LOG_BASE_10_OF_RADIX = 0.30103
 
   INTEGER, PARAMETER, PRIVATE :: &
-       d = DIGITS (0) / 2, &
-       r = RADIX (0), &
-       base = r ** d, &
-       nr_of_digits = nr_of_decimal_digits / (log_base_10_of_radix * d) + 1
+       D = DIGITS (0) / 2, &
+       R = RADIX (0), &
+       BASE = R ** D, &
+       NR_OF_DIGITS = NR_OF_DECIMAL_DIGITS / (LOG_BASE_10_OF_RADIX * D) + 1
 
-  ! The base of the number system is r ** d,
-  ! so that each "digit" is 0 to r**d - 1
+  ! THE BASE OF THE NUMBER SYSTEM IS R ** D,
+  ! SO THAT EACH "DIGIT" IS 0 TO R**D - 1
 
-  TYPE, PUBLIC :: big_integer
+  TYPE, PUBLIC :: BIG_INTEGER
      PRIVATE
-     INTEGER, DIMENSION (0 : nr_of_digits) :: digit
-  END TYPE big_integer
+     INTEGER, DIMENSION (0 : NR_OF_DIGITS) :: DIGIT
+  END TYPE BIG_INTEGER
 
-  INTERFACE big
-     MODULE PROCEDURE big_char, &
-          big_int
+  INTERFACE BIG
+     MODULE PROCEDURE BIG_CHAR, &
+          BIG_INT
   END INTERFACE
 
-  INTERFACE int
-     MODULE PROCEDURE int_char, &
-          int_big
+  INTERFACE INT
+     MODULE PROCEDURE INT_CHAR, &
+          INT_BIG
   END INTERFACE
 
-  INTERFACE char
-     MODULE PROCEDURE char_big, &
-          char_int
+  INTERFACE CHAR
+     MODULE PROCEDURE CHAR_BIG, &
+          CHAR_INT
   END INTERFACE
 
   INTERFACE ASSIGNMENT (=)
-     MODULE PROCEDURE big_gets_int, &
-          big_gets_char, &
-          int_gets_big, &
-          int_gets_char, &
-          char_gets_big, &
-          char_gets_int
+     MODULE PROCEDURE BIG_GETS_INT, &
+          BIG_GETS_CHAR, &
+          INT_GETS_BIG, &
+          INT_GETS_CHAR, &
+          CHAR_GETS_BIG, &
+          CHAR_GETS_INT
   END INTERFACE
 
   INTERFACE OPERATOR (+)
-     MODULE PROCEDURE big_plus_int, &
-          big_plus_big
+     MODULE PROCEDURE BIG_PLUS_INT, &
+          BIG_PLUS_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (-)
-     MODULE PROCEDURE big_minus_int, &
-          int_minus_big, &
-          big_minus_big
+     MODULE PROCEDURE BIG_MINUS_INT, &
+          INT_MINUS_BIG, &
+          BIG_MINUS_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (*)
-     MODULE PROCEDURE big_times_int, &
-          int_times_big, &
-          big_times_big
+     MODULE PROCEDURE BIG_TIMES_INT, &
+          INT_TIMES_BIG, &
+          BIG_TIMES_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (/)
-     MODULE PROCEDURE big_div_int, &
-          int_div_big, &
-          big_div_big
+     MODULE PROCEDURE BIG_DIV_INT, &
+          INT_DIV_BIG, &
+          BIG_DIV_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (**)
-     MODULE PROCEDURE big_power_int
+     MODULE PROCEDURE BIG_POWER_INT
   END INTERFACE
 
-  INTERFACE modulo
-     MODULE PROCEDURE modulo_big_int, &
-          modulo_int_big, &
-          modulo_big_big
+  INTERFACE MODULO
+     MODULE PROCEDURE MODULO_BIG_INT, &
+          MODULO_INT_BIG, &
+          MODULO_BIG_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (==)
-     MODULE PROCEDURE big_eq_int, &
-          int_eq_big, &
-          big_eq_big
+     MODULE PROCEDURE BIG_EQ_INT, &
+          INT_EQ_BIG, &
+          BIG_EQ_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (/=)
-     MODULE PROCEDURE big_ne_int, &
-          int_ne_big, &
-          big_ne_big
+     MODULE PROCEDURE BIG_NE_INT, &
+          INT_NE_BIG, &
+          BIG_NE_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (<=)
-     MODULE PROCEDURE big_le_int, &
-          int_le_big, &
-          big_le_big
+     MODULE PROCEDURE BIG_LE_INT, &
+          INT_LE_BIG, &
+          BIG_LE_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (>=)
-     MODULE PROCEDURE big_ge_int, &
-          int_ge_big, &
-          big_ge_big
+     MODULE PROCEDURE BIG_GE_INT, &
+          INT_GE_BIG, &
+          BIG_GE_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (<)
-     MODULE PROCEDURE big_lt_int, &
-          int_lt_big, &
-          big_lt_big
+     MODULE PROCEDURE BIG_LT_INT, &
+          INT_LT_BIG, &
+          BIG_LT_BIG
   END INTERFACE
 
   INTERFACE OPERATOR (>)
-     MODULE PROCEDURE big_gt_int, &
-          int_gt_big, &
-          big_gt_big
+     MODULE PROCEDURE BIG_GT_INT, &
+          INT_GT_BIG, &
+          BIG_GT_BIG
   END INTERFACE
 
-  INTERFACE huge
-     MODULE PROCEDURE huge_big
+  INTERFACE HUGE
+     MODULE PROCEDURE HUGE_BIG
   END INTERFACE
 
-  INTERFACE sqrt
-     MODULE PROCEDURE sqrt_big
+  INTERFACE SQRT
+     MODULE PROCEDURE SQRT_BIG
   END INTERFACE
 
-  INTERFACE random_number
-     MODULE PROCEDURE random_number_big
+  INTERFACE RANDOM_NUMBER
+     MODULE PROCEDURE RANDOM_NUMBER_BIG
   END INTERFACE
 
 CONTAINS
 
-  PURE FUNCTION big_char (c) RESULT (b)
+  PURE FUNCTION BIG_CHAR (C) RESULT (B)
 
-    CHARACTER (len=*), INTENT (in) :: c
-    TYPE (big_integer) :: b
-    INTEGER :: temp_digit, n
+    CHARACTER (LEN=*), INTENT (IN) :: C
+    TYPE (BIG_INTEGER) :: B
+    INTEGER :: TEMP_DIGIT, N
 
-    IF (LEN (c) > nr_of_decimal_digits) THEN
-       b = HUGE (b)
+    IF (LEN (C) > NR_OF_DECIMAL_DIGITS) THEN
+       B = HUGE (B)
        RETURN
     END IF
-    b % digit = 0
-    DO n = 1, LEN (c)
-       temp_digit = INDEX ("0123456789", c (n:n)) - 1
-       IF (temp_digit < 0) THEN
-          b = HUGE (b)
+    B % DIGIT = 0
+    DO N = 1, LEN (C)
+       TEMP_DIGIT = INDEX ("0123456789", C (N:N)) - 1
+       IF (TEMP_DIGIT < 0) THEN
+          B = HUGE (B)
        END IF
-       b = b * 10 + temp_digit
+       B = B * 10 + TEMP_DIGIT
     END DO
 
-  END FUNCTION big_char
+  END FUNCTION BIG_CHAR
 
-  PURE SUBROUTINE big_gets_char (b, c)
+  PURE SUBROUTINE BIG_GETS_CHAR (B, C)
 
-    TYPE (big_integer), INTENT (out) :: b
-    CHARACTER (len=*), INTENT (in) :: c
+    TYPE (BIG_INTEGER), INTENT (OUT) :: B
+    CHARACTER (LEN=*), INTENT (IN) :: C
 
-    b = big_char (TRIM (c))
+    B = BIG_CHAR (TRIM (C))
 
-  END SUBROUTINE big_gets_char
+  END SUBROUTINE BIG_GETS_CHAR
 
-  PURE FUNCTION big_int (i) RESULT (b)
+  PURE FUNCTION BIG_INT (I) RESULT (B)
 
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer) :: b
-    INTEGER :: temp_i, n
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER) :: B
+    INTEGER :: TEMP_I, N
 
-    IF (i < 0) THEN
-       b = HUGE (b)
+    IF (I < 0) THEN
+       B = HUGE (B)
     END IF
 
-    b % digit = 0
-    temp_i = i
-    DO n = 0, nr_of_digits - 1
-       IF (temp_i == 0) THEN
+    B % DIGIT = 0
+    TEMP_I = I
+    DO N = 0, NR_OF_DIGITS - 1
+       IF (TEMP_I == 0) THEN
           RETURN
        END IF
-       b % digit (n) = MODULO (temp_i, base)
-       temp_i = temp_i / base
+       B % DIGIT (N) = MODULO (TEMP_I, BASE)
+       TEMP_I = TEMP_I / BASE
     END DO
 
-    IF (temp_i /= 0) THEN
-       b = HUGE (b)
+    IF (TEMP_I /= 0) THEN
+       B = HUGE (B)
     END IF
 
-  END FUNCTION big_int
+  END FUNCTION BIG_INT
 
-  PURE SUBROUTINE big_gets_int (b, i)
+  PURE SUBROUTINE BIG_GETS_INT (B, I)
 
-    TYPE (big_integer), INTENT (out) :: b
-    INTEGER, INTENT (in) :: i
+    TYPE (BIG_INTEGER), INTENT (OUT) :: B
+    INTEGER, INTENT (IN) :: I
 
-    b = big (i)
+    B = BIG (I)
 
-  END SUBROUTINE big_gets_int
+  END SUBROUTINE BIG_GETS_INT
 
-  PURE FUNCTION int_char (c) RESULT (i)
+  PURE FUNCTION INT_CHAR (C) RESULT (I)
 
-    CHARACTER (len=*), INTENT (in) :: c
-    INTEGER :: i
+    CHARACTER (LEN=*), INTENT (IN) :: C
+    INTEGER :: I
 
-    i = INT (big (TRIM (c)))
+    I = INT (BIG (TRIM (C)))
 
-  END FUNCTION int_char
+  END FUNCTION INT_CHAR
 
-  PURE SUBROUTINE int_gets_char (i, c)
+  PURE SUBROUTINE INT_GETS_CHAR (I, C)
 
-    INTEGER, INTENT (out) :: i
-    CHARACTER (len=*), INTENT (in) :: c
+    INTEGER, INTENT (OUT) :: I
+    CHARACTER (LEN=*), INTENT (IN) :: C
 
-    i = int_char (TRIM (c))
+    I = INT_CHAR (TRIM (C))
 
-  END SUBROUTINE int_gets_char
+  END SUBROUTINE INT_GETS_CHAR
 
-  PURE FUNCTION int_big (b) RESULT (i)
+  PURE FUNCTION INT_BIG (B) RESULT (I)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER :: i
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER :: I
 
-    IF (msd (b) > 1) THEN
-       i = HUGE (i)
+    IF (MSD (B) > 1) THEN
+       I = HUGE (I)
     ELSE
-       i = base * b % digit (1) + b % digit (0)
+       I = BASE * B % DIGIT (1) + B % DIGIT (0)
     END IF
 
-  END FUNCTION int_big
+  END FUNCTION INT_BIG
 
-  PURE SUBROUTINE int_gets_big (i, b)
+  PURE SUBROUTINE INT_GETS_BIG (I, B)
 
-    INTEGER, INTENT (out) :: i
-    TYPE (big_integer), INTENT (in) :: b
+    INTEGER, INTENT (OUT) :: I
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
 
-    i = INT (b)
+    I = INT (B)
 
-  END SUBROUTINE int_gets_big
+  END SUBROUTINE INT_GETS_BIG
 
-  PURE FUNCTION char_big (b) RESULT (c)
+  PURE FUNCTION CHAR_BIG (B) RESULT (C)
 
-    TYPE (big_integer), INTENT (in) :: b
-    CHARACTER (len=nr_of_decimal_digits+9) :: c
-    TYPE (big_integer) :: temp_big
-    INTEGER :: n, remainder
-    CHARACTER (len = *), PARAMETER :: digit_chars = "0123456789"
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    CHARACTER (LEN=NR_OF_DECIMAL_DIGITS+9) :: C
+    TYPE (BIG_INTEGER) :: TEMP_BIG
+    INTEGER :: N, REMAINDER
+    CHARACTER (LEN = *), PARAMETER :: DIGIT_CHARS = "0123456789"
 
-    temp_big = b
-    c = REPEAT (" ", LEN(c)-1) // "0"
-    DO n = LEN (c), 1, -1
-       IF (temp_big == 0) THEN
+    TEMP_BIG = B
+    C = REPEAT (" ", LEN(C)-1) // "0"
+    DO N = LEN (C), 1, -1
+       IF (TEMP_BIG == 0) THEN
           EXIT
        END IF
-       remainder = MODULO (temp_big, 10) + 1
-       temp_big = temp_big / 10
-       c (n:n) = digit_chars (remainder:remainder)
+       REMAINDER = MODULO (TEMP_BIG, 10) + 1
+       TEMP_BIG = TEMP_BIG / 10
+       C (N:N) = DIGIT_CHARS (REMAINDER:REMAINDER)
     END DO
 
-    c = ADJUSTL (c)
+    C = ADJUSTL (C)
 
-  END FUNCTION char_big
+  END FUNCTION CHAR_BIG
 
-  PURE SUBROUTINE char_gets_big (c, b)
+  PURE SUBROUTINE CHAR_GETS_BIG (C, B)
 
-    TYPE (big_integer), INTENT (in) :: b
-    CHARACTER (len=*), INTENT (out) :: c
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    CHARACTER (LEN=*), INTENT (OUT) :: C
 
-    c = CHAR (b)
+    C = CHAR (B)
 
-  END SUBROUTINE char_gets_big
+  END SUBROUTINE CHAR_GETS_BIG
 
-  PURE FUNCTION char_int (i) RESULT (c)
+  PURE FUNCTION CHAR_INT (I) RESULT (C)
 
-    INTEGER, INTENT (in) :: i
-    CHARACTER (len=nr_of_decimal_digits+9) :: c
+    INTEGER, INTENT (IN) :: I
+    CHARACTER (LEN=NR_OF_DECIMAL_DIGITS+9) :: C
 
-    c = big (i)
+    C = BIG (I)
 
-  END FUNCTION char_int
+  END FUNCTION CHAR_INT
 
-  PURE SUBROUTINE char_gets_int (c, i)
+  PURE SUBROUTINE CHAR_GETS_INT (C, I)
 
-    INTEGER, INTENT (in) :: i
-    CHARACTER (len=*), INTENT (out) :: c
+    INTEGER, INTENT (IN) :: I
+    CHARACTER (LEN=*), INTENT (OUT) :: C
 
-    c = big (i)
+    C = BIG (I)
 
-  END SUBROUTINE char_gets_int
+  END SUBROUTINE CHAR_GETS_INT
 
-  PURE FUNCTION msd (x) RESULT (msd_result)
+  PURE FUNCTION MSD (X) RESULT (MSD_RESULT)
 
-    ! Find most significan digit of x
+    ! FIND MOST SIGNIFICAN DIGIT OF X
 
-    TYPE (big_integer), INTENT (in) :: x
-    INTEGER :: msd_result
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: X
+    INTEGER :: MSD_RESULT
+    INTEGER :: N
 
-    DO n = nr_of_digits, 0, -1
-       IF (x % digit (n) /= 0) THEN
-          msd_result = n
+    DO N = NR_OF_DIGITS, 0, -1
+       IF (X % DIGIT (N) /= 0) THEN
+          MSD_RESULT = N
           RETURN
        END IF
     END DO
 
-    msd_result = -1
+    MSD_RESULT = -1
 
-  END FUNCTION msd
+  END FUNCTION MSD
 
-  PURE FUNCTION big_plus_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_PLUS_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer) :: bi
-    INTEGER :: n, summ, carry
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER) :: BI
+    INTEGER :: N, SUMM, CARRY
 
-    IF (i < base) THEN
-       carry = i
-       DO n = 0, nr_of_digits - 1
-          summ = b % digit (n) + carry
-          bi % digit (n) = MODULO (summ, base)
-          carry = summ / base
-          IF (carry == 0) THEN
-             bi % digit (n+1:) = b % digit (n+1:)
+    IF (I < BASE) THEN
+       CARRY = I
+       DO N = 0, NR_OF_DIGITS - 1
+          SUMM = B % DIGIT (N) + CARRY
+          BI % DIGIT (N) = MODULO (SUMM, BASE)
+          CARRY = SUMM / BASE
+          IF (CARRY == 0) THEN
+             BI % DIGIT (N+1:) = B % DIGIT (N+1:)
              RETURN
           END IF
        END DO
-       IF (n==nr_of_digits) THEN
-          bi = HUGE (bi)
+       IF (N==NR_OF_DIGITS) THEN
+          BI = HUGE (BI)
        END IF
     ELSE
-       bi = b + big (i)
+       BI = B + BIG (I)
     END IF
 
-  END FUNCTION big_plus_int
+  END FUNCTION BIG_PLUS_INT
 
-  PURE FUNCTION int_plus_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_PLUS_BIG (I, B) RESULT (BI)
 
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer), INTENT (in) :: b
-    TYPE (big_integer) :: bi
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    TYPE (BIG_INTEGER) :: BI
 
-    bi = b + i
+    BI = B + I
 
-  END FUNCTION int_plus_big
+  END FUNCTION INT_PLUS_BIG
 
-  PURE FUNCTION big_plus_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_PLUS_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    TYPE (big_integer) :: bb
-    INTEGER :: carry, temp_digit, n, m
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    TYPE (BIG_INTEGER) :: BB
+    INTEGER :: CARRY, TEMP_DIGIT, N, M
 
-    carry = 0
-    m = MAX (msd (x), msd (y))
-    DO n = 0, m
-       temp_digit = &
-            x % digit (n) + y % digit (n) + carry
-       bb % digit (n) = MODULO (temp_digit, base)
-       carry = temp_digit / base
+    CARRY = 0
+    M = MAX (MSD (X), MSD (Y))
+    DO N = 0, M
+       TEMP_DIGIT = &
+            X % DIGIT (N) + Y % DIGIT (N) + CARRY
+       BB % DIGIT (N) = MODULO (TEMP_DIGIT, BASE)
+       CARRY = TEMP_DIGIT / BASE
     END DO
 
-    bb % digit (m+1) = carry
-    bb % digit (m+2:nr_of_digits) = 0
-    IF (bb % digit (nr_of_digits) /= 0) THEN
-       bb = HUGE (bb)
+    BB % DIGIT (M+1) = CARRY
+    BB % DIGIT (M+2:NR_OF_DIGITS) = 0
+    IF (BB % DIGIT (NR_OF_DIGITS) /= 0) THEN
+       BB = HUGE (BB)
     END IF
 
-  END FUNCTION big_plus_big
+  END FUNCTION BIG_PLUS_BIG
 
-  PURE FUNCTION big_minus_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_MINUS_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer) :: bi
-    INTEGER :: n, borrow, diff, msdb
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER) :: BI
+    INTEGER :: N, BORROW, DIFF, MSDB
 
-    bi % digit = 0
-    msdb = msd (b)
-    IF (msdb<1 .AND. b % digit (0) < i) THEN
+    BI % DIGIT = 0
+    MSDB = MSD (B)
+    IF (MSDB<1 .AND. B % DIGIT (0) < I) THEN
        RETURN
     END IF
 
-    IF (i < base) THEN
-       borrow = i
-       DO n = 0, nr_of_digits - 1
-          diff = b % digit (n) - borrow
-          bi % digit (n) = MODULO (diff, base)
-          borrow = (base - diff) / base
-          IF (borrow == 0) THEN
-             bi % digit (n+1:msdb) = b % digit (n+1:msdb)
+    IF (I < BASE) THEN
+       BORROW = I
+       DO N = 0, NR_OF_DIGITS - 1
+          DIFF = B % DIGIT (N) - BORROW
+          BI % DIGIT (N) = MODULO (DIFF, BASE)
+          BORROW = (BASE - DIFF) / BASE
+          IF (BORROW == 0) THEN
+             BI % DIGIT (N+1:MSDB) = B % DIGIT (N+1:MSDB)
              RETURN
           END IF
        END DO
     ELSE
-       bi = b - big (i)
+       BI = B - BIG (I)
     END IF
 
-  END FUNCTION big_minus_int
+  END FUNCTION BIG_MINUS_INT
 
-  PURE FUNCTION int_minus_big (i, b) RESULT (ib)
+  PURE FUNCTION INT_MINUS_BIG (I, B) RESULT (IB)
 
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer), INTENT (in) :: b
-    TYPE (big_integer) :: ib
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    TYPE (BIG_INTEGER) :: IB
 
-    ib = big (i) - b
+    IB = BIG (I) - B
 
-  END FUNCTION int_minus_big
+  END FUNCTION INT_MINUS_BIG
 
-  PURE FUNCTION big_minus_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_MINUS_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    TYPE (big_integer) :: bb
-    TYPE (big_integer) :: temp_big
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    TYPE (BIG_INTEGER) :: BB
+    TYPE (BIG_INTEGER) :: TEMP_BIG
+    INTEGER :: N
 
-    temp_big = x
-    DO n = 0, nr_of_digits - 1
-       bb % digit (n) = temp_big % digit (n) - y % digit (n)
-       IF (bb % digit (n) < 0) THEN
-          bb % digit (n) = bb % digit (n) + base
-          temp_big % digit (n + 1) = temp_big % digit (n + 1) - 1
+    TEMP_BIG = X
+    DO N = 0, NR_OF_DIGITS - 1
+       BB % DIGIT (N) = TEMP_BIG % DIGIT (N) - Y % DIGIT (N)
+       IF (BB % DIGIT (N) < 0) THEN
+          BB % DIGIT (N) = BB % DIGIT (N) + BASE
+          TEMP_BIG % DIGIT (N + 1) = TEMP_BIG % DIGIT (N + 1) - 1
        END IF
     END DO
 
-    IF (temp_big % digit (nr_of_digits) < 0) THEN
-       bb % digit = 0
+    IF (TEMP_BIG % DIGIT (NR_OF_DIGITS) < 0) THEN
+       BB % DIGIT = 0
     ELSE
-       bb % digit (nr_of_digits) = 0
+       BB % DIGIT (NR_OF_DIGITS) = 0
     END IF
 
-  END FUNCTION big_minus_big
+  END FUNCTION BIG_MINUS_BIG
 
-  PURE FUNCTION big_times_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_TIMES_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer) :: bi
-    INTEGER :: ib, prod, carry
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER) :: BI
+    INTEGER :: IB, PROD, CARRY
 
-    IF (i < base) THEN
-       bi % digit = 0
-       carry = 0
-       DO ib = 0, msd (b)
-          prod = b % digit (ib) * i + carry
-          bi % digit (ib) = MODULO (prod, base)
-          carry = prod / base
+    IF (I < BASE) THEN
+       BI % DIGIT = 0
+       CARRY = 0
+       DO IB = 0, MSD (B)
+          PROD = B % DIGIT (IB) * I + CARRY
+          BI % DIGIT (IB) = MODULO (PROD, BASE)
+          CARRY = PROD / BASE
        END DO
-       IF (ib==nr_of_digits .AND. carry /= 0) THEN
-          bi = HUGE (bi)
+       IF (IB==NR_OF_DIGITS .AND. CARRY /= 0) THEN
+          BI = HUGE (BI)
        ELSE
-          bi % digit (ib) = carry
+          BI % DIGIT (IB) = CARRY
        END IF
     ELSE
-       bi = b * big (i)
+       BI = B * BIG (I)
     END IF
 
-  END FUNCTION big_times_int
+  END FUNCTION BIG_TIMES_INT
 
-  PURE FUNCTION int_times_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_TIMES_BIG (I, B) RESULT (BI)
 
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer), INTENT (in) :: b
-    TYPE (big_integer) :: bi
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    TYPE (BIG_INTEGER) :: BI
 
-    bi = b * i
+    BI = B * I
 
-  END FUNCTION int_times_big
+  END FUNCTION INT_TIMES_BIG
 
-  PURE FUNCTION big_times_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_TIMES_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    TYPE (big_integer) :: bb
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    TYPE (BIG_INTEGER) :: BB
 
-    INTEGER :: ix, iy, ib, carry, prod
+    INTEGER :: IX, IY, IB, CARRY, PROD
 
-    bb % digit = 0
+    BB % DIGIT = 0
 
-    DO ix = 0, msd (x)
-       carry = 0
-       ib = ix
-       DO iy = 0, msd (y)
-          prod = x % digit (ix) * y % digit (iy) + bb % digit (ib) + carry
-          carry = prod / base
-          bb % digit (ib) = MODULO (prod, base)
-          IF (ib == nr_of_digits) THEN
-             bb = HUGE (bb)
+    DO IX = 0, MSD (X)
+       CARRY = 0
+       IB = IX
+       DO IY = 0, MSD (Y)
+          PROD = X % DIGIT (IX) * Y % DIGIT (IY) + BB % DIGIT (IB) + CARRY
+          CARRY = PROD / BASE
+          BB % DIGIT (IB) = MODULO (PROD, BASE)
+          IF (IB == NR_OF_DIGITS) THEN
+             BB = HUGE (BB)
              RETURN
           END IF
-          ib = ib + 1
+          IB = IB + 1
        END DO
-       bb % digit (ib) = bb % digit (ib) + carry
+       BB % DIGIT (IB) = BB % DIGIT (IB) + CARRY
     END DO
 
-  END FUNCTION big_times_big
+  END FUNCTION BIG_TIMES_BIG
 
-  PURE FUNCTION big_base_to_power (n)  RESULT (b)
+  PURE FUNCTION BIG_BASE_TO_POWER (N)  RESULT (B)
 
-    INTEGER, INTENT (in) :: n
-    TYPE (big_integer) :: b
+    INTEGER, INTENT (IN) :: N
+    TYPE (BIG_INTEGER) :: B
 
-    IF (n < 0) THEN
-       b = 0
-    ELSE IF (n >= nr_of_digits) THEN
-       b = HUGE (b)
+    IF (N < 0) THEN
+       B = 0
+    ELSE IF (N >= NR_OF_DIGITS) THEN
+       B = HUGE (B)
     ELSE
-       b % digit = 0
-       b % digit (n) = 1
+       B % DIGIT = 0
+       B % DIGIT (N) = 1
     END IF
 
-  END FUNCTION big_base_to_power
+  END FUNCTION BIG_BASE_TO_POWER
 
-  PURE FUNCTION big_div_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_DIV_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer) :: bi
-    INTEGER :: n, temp_int, remainder
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER) :: BI
+    INTEGER :: N, TEMP_INT, REMAINDER
 
-    IF (i == 0) THEN
-       bi = HUGE (bi)
-    ELSE IF (i < base) THEN
-       bi % digit = 0
-       remainder = 0
-       DO n = msd(b), 0, -1
-          temp_int = base * remainder + b % digit (n)
-          bi % digit (n) = temp_int / i
-          remainder = MODULO (temp_int, i)
+    IF (I == 0) THEN
+       BI = HUGE (BI)
+    ELSE IF (I < BASE) THEN
+       BI % DIGIT = 0
+       REMAINDER = 0
+       DO N = MSD(B), 0, -1
+          TEMP_INT = BASE * REMAINDER + B % DIGIT (N)
+          BI % DIGIT (N) = TEMP_INT / I
+          REMAINDER = MODULO (TEMP_INT, I)
        END DO
     ELSE
-       bi = b / big (i)
+       BI = B / BIG (I)
     END IF
 
-  END FUNCTION big_div_int
+  END FUNCTION BIG_DIV_INT
 
-  PURE FUNCTION int_div_big (i, b) RESULT (ib)
+  PURE FUNCTION INT_DIV_BIG (I, B) RESULT (IB)
 
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer), INTENT (in) :: b
-    TYPE (big_integer) :: ib
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    TYPE (BIG_INTEGER) :: IB
 
-    ib = big (i) / b
+    IB = BIG (I) / B
 
-  END FUNCTION int_div_big
+  END FUNCTION INT_DIV_BIG
 
-  PURE FUNCTION big_div_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_DIV_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    TYPE (big_integer) :: bb
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    TYPE (BIG_INTEGER) :: BB
 
-    TYPE (big_integer) :: tx, ty
+    TYPE (BIG_INTEGER) :: TX, TY
 
-    INTEGER :: msdx, msdy, ix, iy
-    INTEGER :: v1, v2, u0, u1, u2
-    INTEGER :: dd, bi, car, bar, prd
+    INTEGER :: MSDX, MSDY, IX, IY
+    INTEGER :: V1, V2, U0, U1, U2
+    INTEGER :: DD, BI, CAR, BAR, PRD
 
-    IF (y == 0) THEN
-       bb = HUGE (bb)
+    IF (Y == 0) THEN
+       BB = HUGE (BB)
        RETURN
     END IF
 
-    msdx = msd(x)
-    msdy = msd(y)
+    MSDX = MSD(X)
+    MSDY = MSD(Y)
 
-    IF (msdy == 0) THEN
-       bb = x / y % digit (0)
+    IF (MSDY == 0) THEN
+       BB = X / Y % DIGIT (0)
        RETURN
     END IF
 
-    bb % digit = 0
+    BB % DIGIT = 0
 
-    IF (msdy < msdy) THEN
+    IF (MSDY < MSDY) THEN
        RETURN
     END IF
 
-    tx = x
-    ty = y
+    TX = X
+    TY = Y
 
-    car = 0
-    bar = 0
-    prd = 0
-    dd = base / (ty % digit (msdy) + 1)
-    IF (dd /= 1) THEN
-       DO ix = 0, msdx
-          tx % digit (ix) = tx % digit (ix) * dd + car
-          car = tx % digit (ix) / base
-          tx % digit (ix) = tx % digit (ix) - base * car
+    CAR = 0
+    BAR = 0
+    PRD = 0
+    DD = BASE / (TY % DIGIT (MSDY) + 1)
+    IF (DD /= 1) THEN
+       DO IX = 0, MSDX
+          TX % DIGIT (IX) = TX % DIGIT (IX) * DD + CAR
+          CAR = TX % DIGIT (IX) / BASE
+          TX % DIGIT (IX) = TX % DIGIT (IX) - BASE * CAR
        END DO
-       tx % digit (msdx+1) = car
-       car = 0
-       DO iy = 0, msdy
-          ty % digit (iy) = ty % digit (iy) * dd + car
-          car = ty % digit (iy) / base
-          ty % digit (iy) = ty % digit (iy) - base * car
+       TX % DIGIT (MSDX+1) = CAR
+       CAR = 0
+       DO IY = 0, MSDY
+          TY % DIGIT (IY) = TY % DIGIT (IY) * DD + CAR
+          CAR = TY % DIGIT (IY) / BASE
+          TY % DIGIT (IY) = TY % DIGIT (IY) - BASE * CAR
        END DO
     END IF
 
-    msdx = msdx + 1
+    MSDX = MSDX + 1
 
-    v1 = ty % digit (msdy)
-    v2 = ty % digit (msdy-1)
-    bb % digit = 0
+    V1 = TY % DIGIT (MSDY)
+    V2 = TY % DIGIT (MSDY-1)
+    BB % DIGIT = 0
 
-    DO msdx = msdx, msdy + 1, -1
+    DO MSDX = MSDX, MSDY + 1, -1
 
-       u0 = tx % digit (msdx)
-       u1 = tx % digit (msdx-1)
-       u2 = tx % digit (msdx-2)
+       U0 = TX % DIGIT (MSDX)
+       U1 = TX % DIGIT (MSDX-1)
+       U2 = TX % DIGIT (MSDX-2)
 
-       IF (u0 == v1) THEN
-          bi = base - 1
+       IF (U0 == V1) THEN
+          BI = BASE - 1
        ELSE
-          bi = (u0*base + u1) / v1
+          BI = (U0*BASE + U1) / V1
        END IF
 
        DO
-          IF (v2*bi <= (u0*base + u1 - bi*v1) * base + u2) THEN
+          IF (V2*BI <= (U0*BASE + U1 - BI*V1) * BASE + U2) THEN
              EXIT
           END IF
-          bi = bi - 1
+          BI = BI - 1
        END DO
 
-       IF (bi > 0) THEN
-          car = 0
-          bar = 0
-          ix = msdx - msdy - 1
-          DO iy = 0, msdy
-             prd = bi * ty % digit (iy) + car
-             car = prd / base
-             prd = prd - base * car
-             tx % digit (ix) = tx % digit (ix) - (prd + bar)
-             IF (tx % digit (ix) < 0) THEN
-                bar = 1
-                tx % digit (ix) = tx % digit (ix) + base
+       IF (BI > 0) THEN
+          CAR = 0
+          BAR = 0
+          IX = MSDX - MSDY - 1
+          DO IY = 0, MSDY
+             PRD = BI * TY % DIGIT (IY) + CAR
+             CAR = PRD / BASE
+             PRD = PRD - BASE * CAR
+             TX % DIGIT (IX) = TX % DIGIT (IX) - (PRD + BAR)
+             IF (TX % DIGIT (IX) < 0) THEN
+                BAR = 1
+                TX % DIGIT (IX) = TX % DIGIT (IX) + BASE
              ELSE
-                bar = 0
+                BAR = 0
              END IF
-             ix = ix + 1
+             IX = IX + 1
           END DO
-          IF (tx % digit (msdx) < car + bar) THEN
-             car = 0
-             bi = bi -1
-             ix = msdx - msdy - 1
-             DO iy = 0, msdy
-                tx % digit (ix) = tx % digit (ix) + ty % digit (iy) + car
-                IF (tx % digit (ix) > base) THEN
-                   car = 1
-                   tx % digit (ix) = tx % digit (ix) - base
+          IF (TX % DIGIT (MSDX) < CAR + BAR) THEN
+             CAR = 0
+             BI = BI -1
+             IX = MSDX - MSDY - 1
+             DO IY = 0, MSDY
+                TX % DIGIT (IX) = TX % DIGIT (IX) + TY % DIGIT (IY) + CAR
+                IF (TX % DIGIT (IX) > BASE) THEN
+                   CAR = 1
+                   TX % DIGIT (IX) = TX % DIGIT (IX) - BASE
                 ELSE
-                   car = 0
+                   CAR = 0
                 END IF
-                ix = ix + 1
+                IX = IX + 1
              END DO
           END IF
        END IF
-       tx % digit (msdx) = 0
-       bb % digit (1:nr_of_digits) = bb % digit (0:nr_of_digits-1)
-       bb % digit (0) = bi
+       TX % DIGIT (MSDX) = 0
+       BB % DIGIT (1:NR_OF_DIGITS) = BB % DIGIT (0:NR_OF_DIGITS-1)
+       BB % DIGIT (0) = BI
     END DO
 
-  END FUNCTION big_div_big
+  END FUNCTION BIG_DIV_BIG
 
-  PURE FUNCTION modulo_big_int (b, i) RESULT (bi)
+  PURE FUNCTION MODULO_BIG_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    INTEGER :: bi
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    INTEGER :: BI
+    INTEGER :: N
 
-    IF (i == 0) THEN
-       bi = HUGE (bi)
-    ELSE IF (i < base) THEN
-       bi = 0
-       DO n = msd(b), 0, -1
-          bi = MODULO (base * bi + b % digit (n), i)
+    IF (I == 0) THEN
+       BI = HUGE (BI)
+    ELSE IF (I < BASE) THEN
+       BI = 0
+       DO N = MSD(B), 0, -1
+          BI = MODULO (BASE * BI + B % DIGIT (N), I)
        END DO
     ELSE
-       bi = MODULO (b, big (i))
+       BI = MODULO (B, BIG (I))
     END IF
 
-  END FUNCTION modulo_big_int
+  END FUNCTION MODULO_BIG_INT
 
-  PURE FUNCTION modulo_int_big (ii, b) RESULT (ib)
+  PURE FUNCTION MODULO_INT_BIG (II, B) RESULT (IB)
 
-    INTEGER, INTENT (in) :: ii
-    TYPE (big_integer), INTENT (in) :: b
-    TYPE (big_integer) :: ib
+    INTEGER, INTENT (IN) :: II
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    TYPE (BIG_INTEGER) :: IB
 
-    ib = MODULO (big (ii), b)
+    IB = MODULO (BIG (II), B)
 
-  END FUNCTION modulo_int_big
+  END FUNCTION MODULO_INT_BIG
 
-  PURE FUNCTION modulo_big_big (x, y) RESULT (bb)
+  PURE FUNCTION MODULO_BIG_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    TYPE (big_integer) :: bb
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    TYPE (BIG_INTEGER) :: BB
 
-    bb = x - x / y * y
+    BB = X - X / Y * Y
 
-  END FUNCTION modulo_big_big
+  END FUNCTION MODULO_BIG_BIG
 
-  PURE FUNCTION big_eq_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_EQ_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) == i
+    BI = INT (B) == I
 
-  END FUNCTION big_eq_int
+  END FUNCTION BIG_EQ_INT
 
-  PURE FUNCTION int_eq_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_EQ_BIG (I, B) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) == i
+    BI = INT (B) == I
 
-  END FUNCTION int_eq_big
+  END FUNCTION INT_EQ_BIG
 
-  PURE FUNCTION big_eq_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_EQ_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    LOGICAL :: bb
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    LOGICAL :: BB
 
-    bb = ALL (x % digit == y % digit)
+    BB = ALL (X % DIGIT == Y % DIGIT)
 
-  END FUNCTION big_eq_big
+  END FUNCTION BIG_EQ_BIG
 
-  PURE FUNCTION big_ne_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_NE_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) /= i
+    BI = INT (B) /= I
 
-  END FUNCTION big_ne_int
+  END FUNCTION BIG_NE_INT
 
-  PURE FUNCTION int_ne_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_NE_BIG (I, B) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) /= i
+    BI = INT (B) /= I
 
-  END FUNCTION int_ne_big
+  END FUNCTION INT_NE_BIG
 
-  PURE FUNCTION big_ne_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_NE_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    LOGICAL :: bb
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    LOGICAL :: BB
 
-    bb = ANY (x % digit /= y % digit)
+    BB = ANY (X % DIGIT /= Y % DIGIT)
 
-  END FUNCTION big_ne_big
+  END FUNCTION BIG_NE_BIG
 
-  PURE FUNCTION big_le_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_LE_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) <= i
+    BI = INT (B) <= I
 
-  END FUNCTION big_le_int
+  END FUNCTION BIG_LE_INT
 
-  PURE FUNCTION int_le_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_LE_BIG (I, B) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = i <= INT (b)
+    BI = I <= INT (B)
 
-  END FUNCTION int_le_big
+  END FUNCTION INT_LE_BIG
 
-  PURE FUNCTION big_le_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_LE_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    LOGICAL :: bb
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    LOGICAL :: BB
+    INTEGER :: N
 
-    bb = .TRUE.
-    DO n = nr_of_digits, 0, -1
-       IF (x % digit (n) /= y % digit (n)) THEN
-          bb = (x % digit (n) < y % digit (n))
+    BB = .TRUE.
+    DO N = NR_OF_DIGITS, 0, -1
+       IF (X % DIGIT (N) /= Y % DIGIT (N)) THEN
+          BB = (X % DIGIT (N) < Y % DIGIT (N))
           EXIT
        END IF
     END DO
 
-  END FUNCTION big_le_big
+  END FUNCTION BIG_LE_BIG
 
-  PURE FUNCTION big_gt_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_GT_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) > i
+    BI = INT (B) > I
 
-  END FUNCTION big_gt_int
+  END FUNCTION BIG_GT_INT
 
-  PURE FUNCTION int_gt_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_GT_BIG (I, B) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = i > INT (b)
+    BI = I > INT (B)
 
-  END FUNCTION int_gt_big
+  END FUNCTION INT_GT_BIG
 
-  PURE FUNCTION big_gt_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_GT_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    LOGICAL :: bb
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    LOGICAL :: BB
+    INTEGER :: N
 
-    bb = .TRUE.
-    DO n = nr_of_digits, 0, -1
-       IF (x % digit (n) /= y % digit (n)) THEN
-          bb = (x % digit (n) < y % digit (n))
+    BB = .TRUE.
+    DO N = NR_OF_DIGITS, 0, -1
+       IF (X % DIGIT (N) /= Y % DIGIT (N)) THEN
+          BB = (X % DIGIT (N) < Y % DIGIT (N))
           EXIT
        END IF
     END DO
 
-    bb = .NOT. bb
+    BB = .NOT. BB
 
-  END FUNCTION big_gt_big
+  END FUNCTION BIG_GT_BIG
 
-  PURE FUNCTION big_lt_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_LT_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) < i
+    BI = INT (B) < I
 
-  END FUNCTION big_lt_int
+  END FUNCTION BIG_LT_INT
 
-  PURE FUNCTION int_lt_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_LT_BIG (I, B) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = i < INT (b)
+    BI = I < INT (B)
 
-  END FUNCTION int_lt_big
+  END FUNCTION INT_LT_BIG
 
-  PURE FUNCTION big_lt_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_LT_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    LOGICAL :: bb
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    LOGICAL :: BB
+    INTEGER :: N
 
-    bb = .FALSE.
-    DO n = nr_of_digits, 0, -1
-       IF (x % digit (n) /= y % digit (n)) THEN
-          bb = (x % digit (n) < y % digit (n))
+    BB = .FALSE.
+    DO N = NR_OF_DIGITS, 0, -1
+       IF (X % DIGIT (N) /= Y % DIGIT (N)) THEN
+          BB = (X % DIGIT (N) < Y % DIGIT (N))
           EXIT
        END IF
     END DO
 
-  END FUNCTION big_lt_big
+  END FUNCTION BIG_LT_BIG
 
-  PURE FUNCTION big_ge_int (b, i) RESULT (bi)
+  PURE FUNCTION BIG_GE_INT (B, I) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = INT (b) >= i
+    BI = INT (B) >= I
 
-  END FUNCTION big_ge_int
+  END FUNCTION BIG_GE_INT
 
-  PURE FUNCTION int_ge_big (i, b) RESULT (bi)
+  PURE FUNCTION INT_GE_BIG (I, B) RESULT (BI)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    LOGICAL :: bi
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    LOGICAL :: BI
 
-    bi = i >= INT (b)
+    BI = I >= INT (B)
 
-  END FUNCTION int_ge_big
+  END FUNCTION INT_GE_BIG
 
-  PURE FUNCTION big_ge_big (x, y) RESULT (bb)
+  PURE FUNCTION BIG_GE_BIG (X, Y) RESULT (BB)
 
-    TYPE (big_integer), INTENT (in) :: x, y
-    LOGICAL :: bb
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: X, Y
+    LOGICAL :: BB
+    INTEGER :: N
 
-    bb = .FALSE.
-    DO n = nr_of_digits, 0, -1
-       IF (x % digit (n) /= y % digit (n)) THEN
-          bb = (x % digit (n) < y % digit (n))
+    BB = .FALSE.
+    DO N = NR_OF_DIGITS, 0, -1
+       IF (X % DIGIT (N) /= Y % DIGIT (N)) THEN
+          BB = (X % DIGIT (N) < Y % DIGIT (N))
           EXIT
        END IF
     END DO
 
-    bb = .NOT. bb
+    BB = .NOT. BB
 
-  END FUNCTION big_ge_big
+  END FUNCTION BIG_GE_BIG
 
-  PURE FUNCTION huge_big (b) RESULT (hb)
+  PURE FUNCTION HUGE_BIG (B) RESULT (HB)
 
-    TYPE (big_integer), INTENT (in) :: b
-    TYPE (big_integer) :: hb
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    TYPE (BIG_INTEGER) :: HB
 
-    hb % digit (0) = b % digit (0) ! to avoid diagnostic
-    hb % digit = base - 1
-    hb % digit (nr_of_digits) = 0
+    HB % DIGIT (0) = B % DIGIT (0) ! TO AVOID DIAGNOSTIC
+    HB % DIGIT = BASE - 1
+    HB % DIGIT (NR_OF_DIGITS) = 0
 
-  END FUNCTION huge_big
+  END FUNCTION HUGE_BIG
 
-  PURE FUNCTION sqrt_big (b) RESULT (sb)
+  PURE FUNCTION SQRT_BIG (B) RESULT (SB)
 
-    TYPE (big_integer), INTENT (in) :: b
-    TYPE (big_integer) :: sb
-    TYPE (big_integer) :: old_sqrt_big, new_sqrt_big
-    INTEGER :: i, n
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    TYPE (BIG_INTEGER) :: SB
+    TYPE (BIG_INTEGER) :: OLD_SQRT_BIG, NEW_SQRT_BIG
+    INTEGER :: I, N
 
-    n = -1
-    DO i = nr_of_digits, 0, -1
-       IF (b % digit (i) /= 0) THEN
-          n = i
+    N = -1
+    DO I = NR_OF_DIGITS, 0, -1
+       IF (B % DIGIT (I) /= 0) THEN
+          N = I
           EXIT
        END IF
     END DO
 
-    IF (n == -1) THEN
-       sb = 0
-    ELSE IF (n == 0) THEN
-       sb = INT (SQRT (REAL (b % digit (0))))
+    IF (N == -1) THEN
+       SB = 0
+    ELSE IF (N == 0) THEN
+       SB = INT (SQRT (REAL (B % DIGIT (0))))
     ELSE
-       old_sqrt_big = 0
-       IF (MODULO (n, 2) == 0) THEN
-          old_sqrt_big % digit (n / 2) = INT (SQRT (REAL (b % digit (n))))
+       OLD_SQRT_BIG = 0
+       IF (MODULO (N, 2) == 0) THEN
+          OLD_SQRT_BIG % DIGIT (N / 2) = INT (SQRT (REAL (B % DIGIT (N))))
        ELSE
-          old_sqrt_big % digit ((n - 1) / 2) =  &
-               INT (SQRT (REAL (base * b % digit (n) + b % digit (n-1))))
+          OLD_SQRT_BIG % DIGIT ((N - 1) / 2) =  &
+               INT (SQRT (REAL (BASE * B % DIGIT (N) + B % DIGIT (N-1))))
        END IF
 
        DO
-          new_sqrt_big = (old_sqrt_big + b / old_sqrt_big) / 2
-          IF (new_sqrt_big == old_sqrt_big .OR.  &
-               new_sqrt_big == old_sqrt_big + 1 .OR.  &
-               new_sqrt_big == 0) THEN
+          NEW_SQRT_BIG = (OLD_SQRT_BIG + B / OLD_SQRT_BIG) / 2
+          IF (NEW_SQRT_BIG == OLD_SQRT_BIG .OR.  &
+               NEW_SQRT_BIG == OLD_SQRT_BIG + 1 .OR.  &
+               NEW_SQRT_BIG == 0) THEN
              EXIT
           ELSE
-             old_sqrt_big = new_sqrt_big
+             OLD_SQRT_BIG = NEW_SQRT_BIG
           END IF
        END DO
-       sb = old_sqrt_big
+       SB = OLD_SQRT_BIG
     END IF
 
-  END FUNCTION sqrt_big
+  END FUNCTION SQRT_BIG
 
-  RECURSIVE FUNCTION big_power_int (b, i)  &
-       RESULT (big_power_int_result)
+  RECURSIVE FUNCTION BIG_POWER_INT (B, I)  &
+       RESULT (BIG_POWER_INT_RESULT)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER, INTENT (in) :: i
-    TYPE (big_integer) :: big_power_int_result
-    TYPE (big_integer) :: temp_big
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER, INTENT (IN) :: I
+    TYPE (BIG_INTEGER) :: BIG_POWER_INT_RESULT
+    TYPE (BIG_INTEGER) :: TEMP_BIG
 
-    IF (i <= 0) THEN
-       big_power_int_result = 1
+    IF (I <= 0) THEN
+       BIG_POWER_INT_RESULT = 1
     ELSE
-       temp_big = big_power_int (b, i / 2)
-       IF (MODULO (i, 2) == 0) THEN
-          big_power_int_result = temp_big * temp_big
+       TEMP_BIG = BIG_POWER_INT (B, I / 2)
+       IF (MODULO (I, 2) == 0) THEN
+          BIG_POWER_INT_RESULT = TEMP_BIG * TEMP_BIG
        ELSE
-          big_power_int_result = temp_big * temp_big * b
+          BIG_POWER_INT_RESULT = TEMP_BIG * TEMP_BIG * B
        END IF
     END IF
 
-  END FUNCTION big_power_int
+  END FUNCTION BIG_POWER_INT
 
-  SUBROUTINE print_big (b)
+  SUBROUTINE PRINT_BIG (B)
 
-    TYPE (big_integer), INTENT (in) :: b
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
 
-    WRITE (unit = *, fmt = "(a)", advance = "no") TRIM (CHAR (b))
+    WRITE (UNIT = *, FMT = "(A)", ADVANCE = "NO") TRIM (CHAR (B))
 
-  END SUBROUTINE print_big
+  END SUBROUTINE PRINT_BIG
 
-  SUBROUTINE print_big_base (b)
+  SUBROUTINE PRINT_BIG_BASE (B)
 
-    TYPE (big_integer), INTENT (in) :: b
-    INTEGER :: n
+    TYPE (BIG_INTEGER), INTENT (IN) :: B
+    INTEGER :: N
 
-    PRINT *, "base: ", base
-    DO n = nr_of_digits, 1, -1
-       IF (b % digit (n) /= 0) THEN
+    PRINT *, "BASE: ", BASE
+    DO N = NR_OF_DIGITS, 1, -1
+       IF (B % DIGIT (N) /= 0) THEN
           EXIT
        END IF
     END DO
-    PRINT "(10i9)", b % digit (n:0:-1)
+    PRINT "(10I9)", B % DIGIT (N:0:-1)
 
-  END SUBROUTINE print_big_base
+  END SUBROUTINE PRINT_BIG_BASE
 
-  SUBROUTINE random_number_big (r, low, high)
+  SUBROUTINE RANDOM_NUMBER_BIG (R, LOW, HIGH)
 
-    !  Generate by linear congruence x' = ax + c mod m
-    !  where m is huge (b) + 1 = base ** nr_of_digits
+    !  GENERATE BY LINEAR CONGRUENCE X' = AX + C MOD M
+    !  WHERE M IS HUGE (B) + 1 = BASE ** NR_OF_DIGITS
 
-    TYPE (big_integer), INTENT (out) :: r
-    TYPE (big_integer), INTENT (in) :: low, high
-    INTEGER :: n, i, carry, prod, summ
-    TYPE (big_integer), SAVE :: x = big_integer ( (/ (1, i=0,nr_of_digits-1), 0 /) )
-    TYPE (big_integer), PARAMETER :: h = big_integer ( (/ (base-1, i=0,nr_of_digits-1), 0 /) )
-    INTEGER, PARAMETER :: a = 16907, c = 8191
+    TYPE (BIG_INTEGER), INTENT (OUT) :: R
+    TYPE (BIG_INTEGER), INTENT (IN) :: LOW, HIGH
+    INTEGER :: N, I, CARRY, PROD, SUMM
+    TYPE (BIG_INTEGER), SAVE :: X = BIG_INTEGER ( (/ (1, I=0,NR_OF_DIGITS-1), 0 /) )
+    TYPE (BIG_INTEGER), PARAMETER :: H = BIG_INTEGER ( (/ (BASE-1, I=0,NR_OF_DIGITS-1), 0 /) )
+    INTEGER, PARAMETER :: A = 16907, C = 8191
 
-    !  Multiply by a
-    carry = 0
-    DO n = 0, nr_of_digits - 1
-       prod = x % digit (n) * a + carry
-       x % digit (n) = MODULO (prod, base)
-       carry = prod / base
+    !  MULTIPLY BY A
+    CARRY = 0
+    DO N = 0, NR_OF_DIGITS - 1
+       PROD = X % DIGIT (N) * A + CARRY
+       X % DIGIT (N) = MODULO (PROD, BASE)
+       CARRY = PROD / BASE
     END DO
 
-    !  Add c
-    carry = c
-    DO n = 0, nr_of_digits - 1
-       summ = x % digit (n) + carry
-       x % digit (n) = MODULO (summ, base)
-       carry = summ / base
+    !  ADD C
+    CARRY = C
+    DO N = 0, NR_OF_DIGITS - 1
+       SUMM = X % DIGIT (N) + CARRY
+       X % DIGIT (N) = MODULO (SUMM, BASE)
+       CARRY = SUMM / BASE
     END DO
 
-    r = x / (h / (high -low + 1)) + low
+    R = X / (H / (HIGH -LOW + 1)) + LOW
 
-  END SUBROUTINE random_number_big
+  END SUBROUTINE RANDOM_NUMBER_BIG
 
-END MODULE big_integer_module
+END MODULE BIG_INTEGER_MODULE

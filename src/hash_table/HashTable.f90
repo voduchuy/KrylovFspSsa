@@ -1,72 +1,72 @@
-MODULE HashTable
+MODULE HASHTABLE
 
-  USE big_integer_module
+  USE BIG_INTEGER_MODULE
 
 CONTAINS
 
-  SUBROUTINE key2key(key1, key2, reaction, reactionkey, rkeysign, pd)
-    USE big_integer_module
+  SUBROUTINE KEY2KEY(KEY1, KEY2, REACTION, REACTIONKEY, RKEYSIGN, PD)
+    USE BIG_INTEGER_MODULE
     IMPLICIT NONE
 
-    INTEGER reaction, pd, rkeysign(pd)
-    TYPE (big_integer) :: key1, key2, reactionkey(pd)
+    INTEGER REACTION, PD, RKEYSIGN(PD)
+    TYPE (BIG_INTEGER) :: KEY1, KEY2, REACTIONKEY(PD)
 
-    IF (rkeysign(reaction).GT.0) THEN
-       key2 = key1 + reactionkey(reaction)
+    IF (RKEYSIGN(REACTION).GT.0) THEN
+       KEY2 = KEY1 + REACTIONKEY(REACTION)
     ELSE
-       key2 = key1 - reactionkey(reaction)
+       KEY2 = KEY1 - REACTIONKEY(REACTION)
     ENDIF
-  END SUBROUTINE  key2key
+  END SUBROUTINE  KEY2KEY
 
-  SUBROUTINE key2keybw(key1, key2, reaction, reactionkey, rkeysign, pd)
-    USE big_integer_module
+  SUBROUTINE KEY2KEYBW(KEY1, KEY2, REACTION, REACTIONKEY, RKEYSIGN, PD)
+    USE BIG_INTEGER_MODULE
     IMPLICIT NONE
 
-    INTEGER reaction, pd, rkeysign(pd)
-    TYPE (big_integer) :: key1, key2, reactionkey(pd)
+    INTEGER REACTION, PD, RKEYSIGN(PD)
+    TYPE (BIG_INTEGER) :: KEY1, KEY2, REACTIONKEY(PD)
 
-    IF (rkeysign(reaction)>0) THEN
-       IF (key1<reactionkey(reaction)) THEN
-          key2 = 0
+    IF (RKEYSIGN(REACTION)>0) THEN
+       IF (KEY1<REACTIONKEY(REACTION)) THEN
+          KEY2 = 0
        ELSE
-          key2 = key1 - reactionkey(reaction)
+          KEY2 = KEY1 - REACTIONKEY(REACTION)
        ENDIF
     ELSE
-       key2 = key1 + reactionkey(reaction)
+       KEY2 = KEY1 + REACTIONKEY(REACTION)
     ENDIF
-  END SUBROUTINE key2keybw
+  END SUBROUTINE KEY2KEYBW
 
-  SUBROUTINE state2key(KEY, state, sd, B)
-    !---  returns the enumeration of the state
-    USE big_integer_module
+  SUBROUTINE STATE2KEY(KEY, STATE, SD, B)
+    !---  RETURNS THE ENUMERATION OF THE STATE
+    USE BIG_INTEGER_MODULE
     IMPLICIT NONE
-    INTEGER sd, state(sd), B, k
-    TYPE (big_integer) :: j, KEY, C
+    INTEGER SD, STATE(SD), B, K
+    TYPE (BIG_INTEGER) :: J, KEY, C
 
-    C = big(B)
-    j = 2
-    DO k = 1, sd
-       j = j + state(k) * (C + 1)**(k - 1)
+    C = BIG(B)
+    J = 2
+    DO K = 1, SD
+       J = J + STATE(K) * (C + 1)**(K - 1)
     ENDDO
-    DO k = 1, sd
-       !        check state is
-       !        1.   nonnegative;  and
-       !        2.   inside maximum allowed;
-       !        (otherwise set j=0 as flag)
-       IF (state(k).LT.0 .OR. state(k).GT.B) j = 0
+    DO K = 1, SD
+       !        CHECK STATE IS
+       !        1.   NONNEGATIVE;  AND
+       !        2.   INSIDE MAXIMUM ALLOWED;
+       !        (OTHERWISE SET J=0 AS FLAG)
+       IF (STATE(K).LT.0 .OR. STATE(K).GT.B) J = 0
     ENDDO
-    KEY = j
-  END SUBROUTINE state2key
+    KEY = J
+  END SUBROUTINE STATE2KEY
   !----------------------------------------------------------------------|
   SUBROUTINE HASH(KEY, MODE, KA, FOUND, &
        KTLEN, KEYTAB, KVTAB)
-    !     Adapted for our cme-solver.
-    !     Uses big_integer_module
-    !     Should take advantage of the fact that DELETE is not used.
-    !     Changes added:
-    !     - A constant DELKEY for deleted key (since big_integer does not
-    !     support negative numbers).
-    !     - Implicit none
+    !     ADAPTED FOR OUR CME-SOLVER.
+    !     USES BIG_INTEGER_MODULE
+    !     SHOULD TAKE ADVANTAGE OF THE FACT THAT DELETE IS NOT USED.
+    !     CHANGES ADDED:
+    !     - A CONSTANT DELKEY FOR DELETED KEY (SINCE BIG_INTEGER DOES NOT
+    !     SUPPORT NEGATIVE NUMBERS).
+    !     - IMPLICIT NONE
     !===============BRENT'S HASHING ALGORITHM.
     !               SEE CACM 16(2):105-109.
     !
@@ -123,7 +123,7 @@ CONTAINS
     !
     !          KTLEN: LENGTH OF KEY TABLE
 
-    USE big_integer_module
+    USE BIG_INTEGER_MODULE
 
     IMPLICIT NONE
 
@@ -133,7 +133,7 @@ CONTAINS
     !           THE PROBLEM SIZE.
     INTEGER KTLEN, MODE, KA
     INTEGER KVTAB(KTLEN)
-    TYPE (big_integer) :: KEY, KEYTAB(KTLEN), IS, KT, DELKEY
+    TYPE (BIG_INTEGER) :: KEY, KEYTAB(KTLEN), IS, KT, DELKEY
     !      INTEGER KEY, KEYTAB(KTLEN)
 
     DELKEY = 1
@@ -235,4 +235,4 @@ CONTAINS
     RETURN
   END SUBROUTINE HASH
 
-END MODULE HashTable
+END MODULE HASHTABLE

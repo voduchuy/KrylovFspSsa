@@ -1,299 +1,299 @@
-MODULE ModelModule
-  ! This module will define the 'class' of CME models in Fortran
-  USE FortranParser
+MODULE MODELMODULE
+  ! THIS MODULE WILL DEFINE THE 'CLASS' OF CME MODELS IN FORTRAN
+  USE FORTRANPARSER
   IMPLICIT NONE
 
   INTERFACE
-     DOUBLE PRECISION FUNCTION propfunc(state, reaction, parameters)
+     DOUBLE PRECISION FUNCTION PROPFUNC(STATE, REACTION, PARAMETERS)
        IMPLICIT NONE
-       INTEGER, INTENT(in) :: state(:), reaction
-       DOUBLE PRECISION, INTENT(in), OPTIONAL :: parameters(:)
-     END FUNCTION propfunc
+       INTEGER, INTENT(IN) :: STATE(:), REACTION
+       DOUBLE PRECISION, INTENT(IN), OPTIONAL :: PARAMETERS(:)
+     END FUNCTION PROPFUNC
   END INTERFACE
 
-  TYPE :: cme_model
-     ! Model needs to be loaded before we do anything else
-     LOGICAL :: loaded = .FALSE.
-     ! Numbers of species, reactions, and uncertain parameters
-     INTEGER :: nSpecies
-     INTEGER :: nReactions
-     INTEGER :: nParameters
+  TYPE :: CME_MODEL
+     ! MODEL NEEDS TO BE LOADED BEFORE WE DO ANYTHING ELSE
+     LOGICAL :: LOADED = .FALSE.
+     ! NUMBERS OF SPECIES, REACTIONS, AND UNCERTAIN PARAMETERS
+     INTEGER :: NSPECIES
+     INTEGER :: NREACTIONS
+     INTEGER :: NPARAMETERS
 
-     DOUBLE PRECISION, DIMENSION (:), ALLOCATABLE :: parameter_val
+     DOUBLE PRECISION, DIMENSION (:), ALLOCATABLE :: PARAMETER_VAL
 
-     ! Stoichiometry matrix, stored in dense format, each column corresponds to one reaction
-     INTEGER, DIMENSION (:, :), ALLOCATABLE :: stoichiometry
+     ! STOICHIOMETRY MATRIX, STORED IN DENSE FORMAT, EACH COLUMN CORRESPONDS TO ONE REACTION
+     INTEGER, DIMENSION (:, :), ALLOCATABLE :: STOICHIOMETRY
 
-     CHARACTER (len = 20), ALLOCATABLE, DIMENSION (:) :: species_names, parameter_names
-     ! Private attribute, the EquationParser type stor\es the byte code to
-     ! compute propensity functions
-     TYPE (EquationParser), DIMENSION(:), ALLOCATABLE, PRIVATE :: propParser
-     PROCEDURE (propfunc), POINTER, nopass :: customprop
+     CHARACTER (LEN = 20), ALLOCATABLE, DIMENSION (:) :: SPECIES_NAMES, PARAMETER_NAMES
+     ! PRIVATE ATTRIBUTE, THE EQUATIONPARSER TYPE STOR\ES THE BYTE CODE TO
+     ! COMPUTE PROPENSITY FUNCTIONS
+     TYPE (EQUATIONPARSER), DIMENSION(:), ALLOCATABLE, PRIVATE :: PROPPARSER
+     PROCEDURE (PROPFUNC), POINTER, NOPASS :: CUSTOMPROP
 
    CONTAINS
-     PROCEDURE :: init_mem
+     PROCEDURE :: CREATE
 
-     PROCEDURE :: load
+     PROCEDURE :: LOAD
 
-     PROCEDURE :: reset_parameters
+     PROCEDURE :: RESET_PARAMETERS
 
-     PROCEDURE :: propensity => propensity_builtin
+     PROCEDURE :: PROPENSITY => PROPENSITY_BUILTIN
 
-  END TYPE cme_model
+  END TYPE CME_MODEL
 
 CONTAINS
 
-  SUBROUTINE init_mem(this, n_species, n_reactions, n_parameters)
+  SUBROUTINE CREATE(THIS, N_SPECIES, N_REACTIONS, N_PARAMETERS)
     IMPLICIT NONE
-    class(cme_model) :: this
-    INTEGER :: n_species
-    INTEGER :: n_reactions
-    INTEGER :: n_parameters
+    CLASS(CME_MODEL) :: THIS
+    INTEGER :: N_SPECIES
+    INTEGER :: N_REACTIONS
+    INTEGER :: N_PARAMETERS
 
-    this%nSpecies = n_species
-    this%nReactions = n_reactions
-    this%nParameters = n_parameters
-    ALLOCATE(this%stoichiometry(n_species, n_reactions), this%parameter_val(n_parameters))
-  END SUBROUTINE init_mem
+    THIS%NSPECIES = N_SPECIES
+    THIS%NREACTIONS = N_REACTIONS
+    THIS%NPARAMETERS = N_PARAMETERS
+    ALLOCATE(THIS%STOICHIOMETRY(N_SPECIES, N_REACTIONS), THIS%PARAMETER_VAL(N_PARAMETERS))
+  END SUBROUTINE CREATE
 
-  SUBROUTINE load(this, filename)
-    ! Purpose:
+  SUBROUTINE LOAD(THIS, FILENAME)
+    ! PURPOSE:
     ! ========
-    ! Load the model from file
+    ! LOAD THE MODEL FROM FILE
     !
-    ! Usage:
+    ! USAGE:
     ! ======
-    !        call model%load(<filename>)
-    !        the variable filename is optional
+    !        CALL MODEL%LOAD(<FILENAME>)
+    !        THE VARIABLE FILENAME IS OPTIONAL
     IMPLICIT NONE
 
-    CLASS (cme_model) :: this
-    CHARACTER (len = *), OPTIONAL :: filename
+    CLASS (CME_MODEL) :: THIS
+    CHARACTER (LEN = *), OPTIONAL :: FILENAME
 
-    CHARACTER (len = 400) :: ichar
-    CHARACTER (len = 200) :: fstring
-    CHARACTER (len = 20), ALLOCATABLE, DIMENSION (:) :: fvar
+    CHARACTER (LEN = 400) :: ICHAR
+    CHARACTER (LEN = 200) :: FSTRING
+    CHARACTER (LEN = 20), ALLOCATABLE, DIMENSION (:) :: FVAR
 
-    LOGICAL :: nspecies_read = .FALSE., nreactions_read = .FALSE., nparam_read = .FALSE., &
-         parameters_read = .FALSE., species_names_read = .FALSE., &
-         param_names_read = .FALSE.
+    LOGICAL :: NSPECIES_READ = .FALSE., NREACTIONS_READ = .FALSE., NPARAM_READ = .FALSE., &
+         PARAMETERS_READ = .FALSE., SPECIES_NAMES_READ = .FALSE., &
+         PARAM_NAMES_READ = .FALSE.
 
-    INTEGER :: i, ios
+    INTEGER :: I, IOS
 
-    IF (PRESENT(filename)) THEN
-       OPEN(unit = 10, file = filename, iostat = ios, status = "old", action = "read")
-       IF (ios /= 0) STOP "Error opening file "
+    IF (PRESENT(FILENAME)) THEN
+       OPEN(UNIT = 10, FILE = FILENAME, IOSTAT = IOS, STATUS = "OLD", ACTION = "READ")
+       IF (IOS /= 0) STOP "ERROR OPENING FILE "
     ELSE
-       OPEN(unit = 10, file = 'model.input', iostat = ios, status = "old", action = "read")
-       IF (ios /= 0) STOP "Error opening file "
+       OPEN(UNIT = 10, FILE = 'MODEL.INPUT', IOSTAT = IOS, STATUS = "OLD", ACTION = "READ")
+       IF (IOS /= 0) STOP "ERROR OPENING FILE "
     ENDIF
 
-    file_scan : DO
-       READ(10, fmt = *, iostat = ios) ichar
-       IF (ios /= 0) EXIT
+    FILE_SCAN : DO
+       READ(10, FMT = *, IOSTAT = IOS) ICHAR
+       IF (IOS /= 0) EXIT
 
-       IF (ichar == 'nspecies') THEN
-          READ(10, fmt = *, iostat = ios) this%nspecies
-          nspecies_read = .TRUE.
+       IF (ICHAR == 'NSPECIES') THEN
+          READ(10, FMT = *, IOSTAT = IOS) THIS%NSPECIES
+          NSPECIES_READ = .TRUE.
        ENDIF
 
-       IF (ichar == 'nreactions') THEN
-          READ(10, fmt = *, iostat = ios) this%nreactions
-          nreactions_read = .TRUE.
+       IF (ICHAR == 'NREACTIONS') THEN
+          READ(10, FMT = *, IOSTAT = IOS) THIS%NREACTIONS
+          NREACTIONS_READ = .TRUE.
        ENDIF
 
-       IF (ichar == 'nparameters') THEN
-          READ(10, fmt = *, iostat = ios) this%nparameters
-          nparam_read = .TRUE.
+       IF (ICHAR == 'NPARAMETERS') THEN
+          READ(10, FMT = *, IOSTAT = IOS) THIS%NPARAMETERS
+          NPARAM_READ = .TRUE.
        ENDIF
 
-       IF (ichar == 'species') THEN
-          ALLOCATE(this%species_names(this%nspecies))
-          DO i = 1, this%nspecies
-             READ(10, fmt = *, iostat = ios) this%species_names(i)
+       IF (ICHAR == 'SPECIES') THEN
+          ALLOCATE(THIS%SPECIES_NAMES(THIS%NSPECIES))
+          DO I = 1, THIS%NSPECIES
+             READ(10, FMT = *, IOSTAT = IOS) THIS%SPECIES_NAMES(I)
           ENDDO
-          species_names_read = .TRUE.
+          SPECIES_NAMES_READ = .TRUE.
        ENDIF
 
-       !      Read the reactions
-       IF (ichar == 'reactions') THEN
-          IF (.NOT.species_names_read) STOP 'Model input error: reactions stated before species names are declared.'
-          IF (.NOT.nspecies_read) STOP 'Model input error: number of species not declared.'
-          IF (.NOT.nreactions_read) STOP 'Model input error: number of reactions not declared.'
-          IF (.NOT.ALLOCATED(this%stoichiometry)) ALLOCATE(this%stoichiometry(this%nspecies, this%nreactions))
-          DO i = 1, this%nreactions
-             READ(10, fmt = '(A)', iostat = ios) ichar
-             CALL stoich_input(this%nspecies, this%stoichiometry(1:this%nspecies, i), ichar, this%species_names)
+       !      READ THE REACTIONS
+       IF (ICHAR == 'REACTIONS') THEN
+          IF (.NOT.SPECIES_NAMES_READ) STOP 'MODEL INPUT ERROR: REACTIONS STATED BEFORE SPECIES NAMES ARE DECLARED.'
+          IF (.NOT.NSPECIES_READ) STOP 'MODEL INPUT ERROR: NUMBER OF SPECIES NOT DECLARED.'
+          IF (.NOT.NREACTIONS_READ) STOP 'MODEL INPUT ERROR: NUMBER OF REACTIONS NOT DECLARED.'
+          IF (.NOT.ALLOCATED(THIS%STOICHIOMETRY)) ALLOCATE(THIS%STOICHIOMETRY(THIS%NSPECIES, THIS%NREACTIONS))
+          DO I = 1, THIS%NREACTIONS
+             READ(10, FMT = '(A)', IOSTAT = IOS) ICHAR
+             CALL STOICH_INPUT(THIS%NSPECIES, THIS%STOICHIOMETRY(1:THIS%NSPECIES, I), ICHAR, THIS%SPECIES_NAMES)
           ENDDO
        ENDIF
 
-       IF (ichar == 'parameters') THEN
-          IF (.NOT.nparam_read) STOP 'Model input error: number of parameters not declared before specifying parameter names.'
-          ALLOCATE(this%parameter_names(this%nparameters), this%parameter_val(this%nparameters))
-          DO i = 1, this%nparameters
-             READ(10, fmt = *, iostat = ios) this%parameter_names(i)
+       IF (ICHAR == 'PARAMETERS') THEN
+          IF (.NOT.NPARAM_READ) STOP 'MODEL INPUT ERROR: NUMBER OF PARAMETERS NOT DECLARED BEFORE SPECIFYING PARAMETER NAMES.'
+          ALLOCATE(THIS%PARAMETER_NAMES(THIS%NPARAMETERS), THIS%PARAMETER_VAL(THIS%NPARAMETERS))
+          DO I = 1, THIS%NPARAMETERS
+             READ(10, FMT = *, IOSTAT = IOS) THIS%PARAMETER_NAMES(I)
           ENDDO
-          param_names_read = .TRUE.
+          PARAM_NAMES_READ = .TRUE.
        ENDIF
 
-       !     Read the propensity functions, the strings of mathematical expressions have to be listed in the same order as the reactions
-       IF (ichar == 'propensities') THEN
-          IF ((species_names_read.EQV..FALSE.).OR.(param_names_read.EQV..FALSE.)) THEN
-             STOP 'Model input error: Propensities specified before all species and parameters are named.'
+       !     READ THE PROPENSITY FUNCTIONS, THE STRINGS OF MATHEMATICAL EXPRESSIONS HAVE TO BE LISTED IN THE SAME ORDER AS THE REACTIONS
+       IF (ICHAR == 'PROPENSITIES') THEN
+          IF ((SPECIES_NAMES_READ.EQV..FALSE.).OR.(PARAM_NAMES_READ.EQV..FALSE.)) THEN
+             STOP 'MODEL INPUT ERROR: PROPENSITIES SPECIFIED BEFORE ALL SPECIES AND PARAMETERS ARE NAMED.'
           ELSE
-             ALLOCATE(fvar(this%nspecies + this%nparameters))
-             ALLOCATE(this%propparser(this%nreactions))
-             DO i = 1, this%nspecies
-                fvar (i) = TRIM(this%species_names(i))
+             ALLOCATE(FVAR(THIS%NSPECIES + THIS%NPARAMETERS))
+             ALLOCATE(THIS%PROPPARSER(THIS%NREACTIONS))
+             DO I = 1, THIS%NSPECIES
+                FVAR (I) = TRIM(THIS%SPECIES_NAMES(I))
              ENDDO
-             DO i = 1, this%nparameters
-                fvar (this%nspecies + i) = TRIM(this%parameter_names(i))
+             DO I = 1, THIS%NPARAMETERS
+                FVAR (THIS%NSPECIES + I) = TRIM(THIS%PARAMETER_NAMES(I))
              ENDDO
-             DO i = 1, this%nreactions
-                READ(10, fmt = '(A)', iostat = ios) fstring
-                this%propparser(i) = EquationParser(TRIM(fstring), fvar)
+             DO I = 1, THIS%NREACTIONS
+                READ(10, FMT = '(A)', IOSTAT = IOS) FSTRING
+                THIS%PROPPARSER(I) = EQUATIONPARSER(TRIM(FSTRING), FVAR)
              ENDDO
           ENDIF
        ENDIF
-    ENDDO file_scan
+    ENDDO FILE_SCAN
     CLOSE (10)
-    this%loaded = .TRUE.
-  END SUBROUTINE load
+    THIS%LOADED = .TRUE.
+  END SUBROUTINE LOAD
   !-----------------------------------------------------------------------------|
-  DOUBLE PRECISION FUNCTION propensity_builtin(this, state, reaction)
-    ! Purpose:
+  DOUBLE PRECISION FUNCTION PROPENSITY_BUILTIN(THIS, STATE, REACTION)
+    ! PURPOSE:
     ! ========
-    ! Interface to compute the propensity based on the string expression
-    ! in the model input file.
+    ! INTERFACE TO COMPUTE THE PROPENSITY BASED ON THE STRING EXPRESSION
+    ! IN THE MODEL INPUT FILE.
     !
-    ! How to use:
+    ! HOW TO USE:
     ! ==========
-    ! y = model%propensity(state, reaction)
+    ! Y = MODEL%PROPENSITY(STATE, REACTION)
     !
-    ! Arguments:
+    ! ARGUMENTS:
     ! =========
-    ! state         : array storing the state
-    ! reaction      : integer storing the reaction index
+    ! STATE         : ARRAY STORING THE STATE
+    ! REACTION      : INTEGER STORING THE REACTION INDEX
     !
 
     IMPLICIT NONE
 
-    class (cme_model), INTENT(in) :: this
-    INTEGER, INTENT(in) :: state(:)
-    INTEGER, INTENT(in) :: reaction
+    CLASS (CME_MODEL), INTENT(IN) :: THIS
+    INTEGER, INTENT(IN) :: STATE(:)
+    INTEGER, INTENT(IN) :: REACTION
 
-    DOUBLE PRECISION, DIMENSION(this%nspecies + this%nparameters) :: fval
-    INTEGER i, N
+    DOUBLE PRECISION, DIMENSION(THIS%NSPECIES + THIS%NPARAMETERS) :: FVAL
+    INTEGER I, N
 
-    IF (ASSOCIATED(this%customprop)) THEN
-       propensity_builtin = this%customprop(state(1:this%nspecies), reaction, this%parameter_val(1:this%nParameters))
+    IF (ASSOCIATED(THIS%CUSTOMPROP)) THEN
+       PROPENSITY_BUILTIN = THIS%CUSTOMPROP(STATE(1:THIS%NSPECIES), REACTION, THIS%PARAMETER_VAL(1:THIS%NPARAMETERS))
     ELSE
-       N = this%nspecies
-       DO i = 1, this%nspecies
-          fval(i) = DBLE(state(i))
+       N = THIS%NSPECIES
+       DO I = 1, THIS%NSPECIES
+          FVAL(I) = DBLE(STATE(I))
        ENDDO
-       fval(this%nspecies + 1:this%nspecies + this%nparameters) = this%parameter_val(1:this%nparameters)
-       propensity_builtin = this%propparser(reaction)%evaluate(fval)
+       FVAL(THIS%NSPECIES + 1:THIS%NSPECIES + THIS%NPARAMETERS) = THIS%PARAMETER_VAL(1:THIS%NPARAMETERS)
+       PROPENSITY_BUILTIN = THIS%PROPPARSER(REACTION)%EVALUATE(FVAL)
     ENDIF
 
-  END FUNCTION propensity_builtin
+  END FUNCTION PROPENSITY_BUILTIN
   !-----------------------------------------------------------------------------|
-  SUBROUTINE reset_parameters(this, pval)
-    ! Purpose:
+  SUBROUTINE RESET_PARAMETERS(THIS, PVAL)
+    ! PURPOSE:
     ! ========
-    ! Reset the values of the uncertain parameters in the stochastic chemical kinetics model.
+    ! RESET THE VALUES OF THE UNCERTAIN PARAMETERS IN THE STOCHASTIC CHEMICAL KINETICS MODEL.
     !
-    ! How to use:
+    ! HOW TO USE:
     ! ===========
-    ! the command
-    !           call model%reset_parameters(X)
-    ! will reset the parameter values in the model to the values in the array X
+    ! THE COMMAND
+    !           CALL MODEL%RESET_PARAMETERS(X)
+    ! WILL RESET THE PARAMETER VALUES IN THE MODEL TO THE VALUES IN THE ARRAY X
     IMPLICIT NONE
-    class (cme_model) :: this
-    DOUBLE PRECISION, DIMENSION (:) :: pval
+    CLASS (CME_MODEL) :: THIS
+    DOUBLE PRECISION, DIMENSION (:) :: PVAL
 
-    this%parameter_val(1:this%nparameters) = pval(1:this%nparameters)
+    THIS%PARAMETER_VAL(1:THIS%NPARAMETERS) = PVAL(1:THIS%NPARAMETERS)
 
-  END SUBROUTINE reset_parameters
+  END SUBROUTINE RESET_PARAMETERS
   !-----------------------------------------------------------------------------|
-  SUBROUTINE stoich_input(nspecies, stoich_vec, str, species_names)
+  SUBROUTINE STOICH_INPUT(NSPECIES, STOICH_VEC, STR, SPECIES_NAMES)
 
-    !   Purpose:
+    !   PURPOSE:
     !   =======
-    !   Output the stoichiometry vector of the reaction given its string expression
+    !   OUTPUT THE STOICHIOMETRY VECTOR OF THE REACTION GIVEN ITS STRING EXPRESSION
     !
     IMPLICIT NONE
-    INTEGER, INTENT (inout) :: stoich_vec(*)
-    INTEGER, INTENT(in) :: nspecies
-    CHARACTER(len = *), INTENT(in) :: str
-    CHARACTER(len = *), DIMENSION(nspecies), INTENT(in) :: species_names
+    INTEGER, INTENT (INOUT) :: STOICH_VEC(*)
+    INTEGER, INTENT(IN) :: NSPECIES
+    CHARACTER(LEN = *), INTENT(IN) :: STR
+    CHARACTER(LEN = *), DIMENSION(NSPECIES), INTENT(IN) :: SPECIES_NAMES
 
 
-    !   Internal variables
-    CHARACTER(len = 200), DIMENSION(100) :: terms       ! supporting up to 100 reactants+products
-    CHARACTER(len = 50) :: word = ''
-    INTEGER :: dir = 0       ! direction of the arrow , 1 if "->", 2 if "<-", if 0 then unspecified.
-    INTEGER :: ell, i, nterms, nleft, coeff, k, j
-    LOGICAL :: defined = .FALSE.
+    !   INTERNAL VARIABLES
+    CHARACTER(LEN = 200), DIMENSION(100) :: TERMS       ! SUPPORTING UP TO 100 REACTANTS+PRODUCTS
+    CHARACTER(LEN = 50) :: WORD = ''
+    INTEGER :: DIR = 0       ! DIRECTION OF THE ARROW , 1 IF "->", 2 IF "<-", IF 0 THEN UNSPECIFIED.
+    INTEGER :: ELL, I, NTERMS, NLEFT, COEFF, K, J
+    LOGICAL :: DEFINED = .FALSE.
 
-    nterms = 0
-    nleft = 0
+    NTERMS = 0
+    NLEFT = 0
 
-    word = ''
+    WORD = ''
 
-    stoich_vec(1:nspecies) = 0
-    ell = LEN(TRIM(str))
-    string_scan : DO i = 1, ell
-       word = TRIM(word) // str(i:i)
-       IF (str(i:i) == ' ' .OR. i == ell) THEN
-          word = ADJUSTL(word);
-          IF (TRIM(word) == '->') THEN
-             dir = 1
-             nleft = nterms ! number of terms on the left side of the equation
-          ELSEIF (TRIM(word) == '<-') THEN
-             dir = 2
-             nleft = nterms ! number of terms on the left side of the equation
-          ELSEIF (TRIM(word) /= '+') THEN
-             nterms = nterms + 1
-             terms(nterms) = TRIM(word)
+    STOICH_VEC(1:NSPECIES) = 0
+    ELL = LEN(TRIM(STR))
+    STRING_SCAN : DO I = 1, ELL
+       WORD = TRIM(WORD) // STR(I:I)
+       IF (STR(I:I) == ' ' .OR. I == ELL) THEN
+          WORD = ADJUSTL(WORD);
+          IF (TRIM(WORD) == '->') THEN
+             DIR = 1
+             NLEFT = NTERMS ! NUMBER OF TERMS ON THE LEFT SIDE OF THE EQUATION
+          ELSEIF (TRIM(WORD) == '<-') THEN
+             DIR = 2
+             NLEFT = NTERMS ! NUMBER OF TERMS ON THE LEFT SIDE OF THE EQUATION
+          ELSEIF (TRIM(WORD) /= '+') THEN
+             NTERMS = NTERMS + 1
+             TERMS(NTERMS) = TRIM(WORD)
           ENDIF
-          word = ''
+          WORD = ''
        ENDIF
-    END DO string_scan
+    END DO STRING_SCAN
 
-    IF (dir==0) THEN
-       STOP 'Syntax error in chemical reaction, only one side was written.'
+    IF (DIR==0) THEN
+       STOP 'SYNTAX ERROR IN CHEMICAL REACTION, ONLY ONE SIDE WAS WRITTEN.'
     ENDIF
 
-    ! Processing the terms of the reaction equation, read their coefficients to the stoichiometry vector
-    DO i = 1, nterms
-       WRITE(*, *) terms(i)
-       IF (terms(i) /= '0') THEN
-          DO j = 1, nspecies
-             word = terms(i)
-             k = INDEX(terms(i), TRIM(species_names(j)))
-             defined = defined .OR. (k/=0)
-             IF (k==0) THEN
-                coeff = 0
-             ELSEIF (word(k:LEN(TRIM(word)))==TRIM(species_names(j))) THEN
-                IF (k > 1) THEN
-                   READ(word(1:k - 1), *) coeff
-                ELSEIF (k == 1) THEN
-                   coeff = 1
+    ! PROCESSING THE TERMS OF THE REACTION EQUATION, READ THEIR COEFFICIENTS TO THE STOICHIOMETRY VECTOR
+    DO I = 1, NTERMS
+       WRITE(*, *) TERMS(I)
+       IF (TERMS(I) /= '0') THEN
+          DO J = 1, NSPECIES
+             WORD = TERMS(I)
+             K = INDEX(TERMS(I), TRIM(SPECIES_NAMES(J)))
+             DEFINED = DEFINED .OR. (K/=0)
+             IF (K==0) THEN
+                COEFF = 0
+             ELSEIF (WORD(K:LEN(TRIM(WORD)))==TRIM(SPECIES_NAMES(J))) THEN
+                IF (K > 1) THEN
+                   READ(WORD(1:K - 1), *) COEFF
+                ELSEIF (K == 1) THEN
+                   COEFF = 1
                 ENDIF
              ENDIF
-             IF (i <= nleft) THEN
-                stoich_vec(j) = stoich_vec(j) - coeff
+             IF (I <= NLEFT) THEN
+                STOICH_VEC(J) = STOICH_VEC(J) - COEFF
              ELSE
-                stoich_vec(j) = stoich_vec(j) + coeff
+                STOICH_VEC(J) = STOICH_VEC(J) + COEFF
              ENDIF
           ENDDO
-          IF (.NOT.defined) WRITE(*, *) 'Warning: species ', terms(i), ' not defined in the model.'
+          IF (.NOT.DEFINED) WRITE(*, *) 'WARNING: SPECIES ', TERMS(I), ' NOT DEFINED IN THE MODEL.'
        ENDIF
     END DO
 
-    IF (dir == 2) stoich_vec(1:nspecies) = -1 * stoich_vec(1:nspecies)
+    IF (DIR == 2) STOICH_VEC(1:NSPECIES) = -1 * STOICH_VEC(1:NSPECIES)
 
-  END SUBROUTINE stoich_input
+  END SUBROUTINE STOICH_INPUT
 
-END MODULE ModelModule
+END MODULE MODELMODULE
