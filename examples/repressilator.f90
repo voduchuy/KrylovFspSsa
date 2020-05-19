@@ -1,7 +1,7 @@
 ! Created by ${USER_NAME} on 11/27/18.
 
-PROGRAM solve_toggle
-  !     Solve CME of the toggle switch
+PROGRAM solve_repress
+  !     Solve CME of the repressilator
   USE StateSpace
   USE KrylovSolver
   IMPLICIT NONE
@@ -11,7 +11,7 @@ PROGRAM solve_toggle
      END FUNCTION clock
   END INTERFACE
 
-  DOUBLE PRECISION :: t = 100.0d0, exp_tol = 1.0d-8, fsp_tol = 1.0d-4
+  DOUBLE PRECISION :: t = 10.0d0, exp_tol = 1.0d-14, fsp_tol = 1.0d-4
   TYPE (cme_model) :: model
   TYPE (finite_state_projection) :: fsp_in, fsp
   DOUBLE PRECISION, DIMENSION(nmax) :: p0, p
@@ -20,16 +20,11 @@ PROGRAM solve_toggle
 
   CALL RANDOM_SEED()
 
-  CALL model%init_mem(2, 4, 6)
-  model%stoichiometry = RESHAPE((/1,0,-1,0,0,1,0,-1/), (/2,4/))
-  model%customprop => toggle_propensity
-  CALL model%reset_parameters([1.0d0, 100.0d0, 1.0d0, 1.0d0, 100.0d0, 1.0d0])
+  CALL model%init_mem(3, 6, 3)
+  model%stoichiometry = RESHAPE((/1,0,0,-1,0,0,0,1,0,0,-1,0,0,0,1,0,0,-1/), (/3,6/))
+  model%customprop => propensity
+  CALL model%reset_parameters([100.0D0, 25.0D0, 1.0D0])
   model%loaded = .TRUE.
-
-  WRITE(*,*) model%stoichiometry
-  write(*,*) model%parameter_val
-  write(*,*) toggle_propensity([0,0], 1, [1.0d0, 100.0d0, 1.0d0, 1.0d0, 100.0d0, 1.0d0])
-  WRITE(*,*) model%propensity([0,0], 1)
 
   ! initialize the attributes of the fsp based on the underlying model
   tic = clock()
@@ -39,7 +34,7 @@ PROGRAM solve_toggle
   WRITE(*, fmt = 200) clock() - tic
 
   fsp_in%size = 1
-  fsp_in%state(:, 1) = [0, 0]
+  fsp_in%state(:, 1) = [22, 0, 0]
   p0(1) = 1.0
   fsp_in%vector = p0
   fsp = fsp_in
@@ -52,19 +47,24 @@ PROGRAM solve_toggle
   CALL fsp%clear()
   CALL fsp_in%clear()
 CONTAINS
-  DOUBLE PRECISION FUNCTION toggle_propensity(state, reaction, parameters)
+  DOUBLE PRECISION FUNCTION propensity(state, reaction, parameters)
     INTEGER, INTENT(in) :: state(:), reaction
     DOUBLE PRECISION, INTENT(in), OPTIONAL :: parameters(:)
 
     SELECT CASE (reaction)
     CASE(1)
-       toggle_propensity = parameters(1) + parameters(2)/(1d0 + state(1)**1.5d0)
+       propensity = parameters(1)/(1d0 + parameters(2)*state(2)**6.0d0)
     CASE(2)
-       toggle_propensity = parameters(3)*state(1)
+       propensity = parameters(3)*state(1)
     CASE(3)
-       toggle_propensity = parameters(4) + parameters(5)/(1d0 + state(2)**3.5d0)
+      propensity = parameters(1)/(1d0 + parameters(2)*state(3)**6.0d0)
     CASE(4)
-       toggle_propensity = parameters(6)*state(2)
+      propensity = parameters(3)*state(2)
+    CASE(5)
+      propensity = parameters(1)/(1d0 + parameters(2)*state(1)**6.0d0)
+    CASE(6)
+      propensity = parameters(3)*state(3)
+
     END SELECT
-  END FUNCTION toggle_propensity
-END PROGRAM solve_toggle
+  END FUNCTION propensity
+END PROGRAM

@@ -90,7 +90,6 @@ CONTAINS
         !--------------------------------------------Parameters of the algorithm
         INTEGER :: n, m
         DOUBLE PRECISION :: anorm, wtmp(nfull)
-        DOUBLE PRECISION :: ent_old = 0.0d0, ent = 0.0d0
         INTEGER :: i, j, k1, mh, mx, iv, ih, j1v, ns, ifree, lfree, iexph
         INTEGER :: ireject, ibrkflag, mbrkdwn, nmult, nreject, nexph
         INTEGER :: nscale, nstep
@@ -108,9 +107,9 @@ CONTAINS
         LOGICAL :: m_changed, orderold, kestold
         INTEGER :: m_new, m_old, imreject, jold, ih_old
         REAL :: cost1, cost2
-        DOUBLE PRECISION :: omega, omega_old, t_opt, m_opt
+        DOUBLE PRECISION :: omega, omega_old, t_opt
         DOUBLE PRECISION :: hnorm, nom
-        INTEGER :: nnz, m_start
+        INTEGER :: nnz, m_start, m_opt
         INTEGER :: qiop
 
         ! For the FSP adaptivity
@@ -141,9 +140,9 @@ CONTAINS
 
         !     Check the restrictions on the input parameters
         iflag = 0
-        IF (lwsp.LT.(n * (m + 2) + 5 * (m + 2)**2 + ideg + 1))  iflag = -1
-        IF (liwsp.LT.(m + 2))                       iflag = -2
-        IF ((m.GE.n).OR.(m.LE.0))                 iflag = -3
+        IF (lwsp<(n * (m + 2) + 5 * (m + 2)**2 + ideg + 1))  iflag = -1
+        IF (liwsp<(m + 2))                       iflag = -2
+        IF ((m>=n).OR.(m<=0))                 iflag = -3
         IF (iflag.NE.0) THEN
             PRINT*, 'Bad sizes (in input of DgeXPV), iflag = ', iflag
             STOP
@@ -168,8 +167,8 @@ CONTAINS
         1   p2 = p1 - 1.0d0
         p3 = p2 + p2 + p2
         eps = ABS(p3 - 1.0d0)
-        IF (eps.EQ.0.0d0) go to 1
-        IF (KryTol.LE.eps)   KryTol = SQRT(eps)
+        IF (eps==0.0d0) go to 1
+        IF (KryTol<=eps)   KryTol = SQRT(eps)
         rndoff = eps * anorm
         break_tol = 1.0d-07
         sgn = SIGN(1.0d0, t)
@@ -239,7 +238,7 @@ CONTAINS
         DO 200 j = jold, m
             nmult = nmult + 1
             CALL fmatvec(wsp(j1v - n), wsp(j1v), fsp%matrix)
-            IF (qiop.GT.0)    istart = MAX(1, j - qiop + 1)
+            IF (qiop>0)    istart = MAX(1, j - qiop + 1)
             DO i = istart, j
                 hij = ddot(n, wsp(iv + (i - 1) * n), 1, wsp(j1v), 1)
                 CALL daxpy(n, -hij, wsp(iv + (i - 1) * n), 1, wsp(j1v), 1)
@@ -247,7 +246,7 @@ CONTAINS
             ENDDO
             hj1j = dnrm2(n, wsp(j1v), 1)
             !           If a `happy breakdown' occurs, go straightforward at the end
-            IF (hj1j.LE.break_tol) THEN
+            IF (hj1j<=break_tol) THEN
                 k1 = 0
                 ibrkflag = 1
                 mbrkdwn = j
@@ -288,15 +287,15 @@ CONTAINS
         ENDIF
         402    CONTINUE
         !     Estimate the error
-        IF (k1.EQ.0) THEN
+        IF (k1==0) THEN
             err_loc = KryTol
         ELSE
             p1 = ABS(wsp(iexph + m)) * beta
             p2 = ABS(wsp(iexph + m + 1)) * beta * avnorm
-            IF (p1.GT.10.0d0 * p2) THEN
+            IF (p1>10.0d0 * p2) THEN
                 err_loc = p2
                 xm = 1.0d0 / DBLE(m)
-            ELSE IF (p1.GT.p2) THEN
+            ELSE IF (p1>p2) THEN
                 err_loc = (p1 * p2) / (p1 - p2)
                 xm = 1.0d0 / DBLE(m)
             ELSE
@@ -314,20 +313,20 @@ CONTAINS
         omega_old = omega
         omega = err_loc / (KryTol * t_step)
         !     Estimate the order
-        IF ((m.EQ.m_old).AND.(t_step.NE.t_old).AND.(ireject.GE.1)) THEN
+        IF ((m==m_old).AND.(t_step.NE.t_old).AND.(ireject>=1)) THEN
             order = MAX(1.0d0, LOG(omega / omega_old) / LOG(t_step / t_old))
             orderold = .FALSE.
-        ELSE IF (orderold.OR.ireject.EQ.0) THEN
+        ELSE IF (orderold.OR.ireject==0) THEN
             order = DBLE(m) / 4.0d0
             orderold = .TRUE.
         ELSE
             orderold = .TRUE.
         ENDIF
         !     Estimate kappa
-        IF ((m.NE.m_old).AND.(t_step.EQ.t_old).AND.(ireject.GE.1)) THEN
+        IF ((m.NE.m_old).AND.(t_step==t_old).AND.(ireject>=1)) THEN
             k_factor = MAX(1.1d0, (omega / omega_old)**(1.0d0 / (m_old - m)))
             kestold = .FALSE.
-        ELSE IF (kestold .OR. ireject.EQ.0) THEN
+        ELSE IF (kestold .OR. ireject==0) THEN
             kestold = .TRUE.
             k_factor = 2.0d0
         ELSE
@@ -337,7 +336,7 @@ CONTAINS
         t_old = t_step
         m_old = m
         !     Suggest new step size and Krylov dimension
-        IF ((m.EQ.m_max).AND.(omega.GT.delta).OR.(imreject.GT.4)) THEN
+        IF ((m==m_max).AND.(omega>delta).OR.(imreject>4)) THEN
             t_new = MIN(t_out - t_now, &
                     MAX(t_step / 5.0d0, &
                             MIN(5.0d0 * t_step, &
@@ -355,19 +354,12 @@ CONTAINS
                     m + CEILING(LOG(omega) / LOG(k_factor))), &
                     m_max, &
                     CEILING(4.0d0 * m / 3.0d0) + 1)
+
             !           Estimate costs
-            nom = 25.0d0 / 3.0d0 + &
-                    MAX(0, 2 + INT(LOG(t_opt * hnorm) / LOG(2.0d0)))
-            cost1 = NINT((t_out - t_now) / t_opt) * &
-                    (2 * (m + 1) * nnz + (5 * m + 4 * qiop * m + &
-                            2 * qiop - 2 * qiop * qiop + 7) * n + 2 * nom * (m + 2) * (m + 2) * (m + 2))
-            nom = 25.0d0 / 3.0d0 + &
-                    MAX(0, 2 + INT(LOG(t_step * hnorm) / LOG(2.0d0)))
-            cost2 = NINT((t_out - t_now) / t_step) * &
-                    (2 * (m_opt + 1) * nnz + &
-                            (5 * m_opt + 4 * qiop * m_opt + 2 * qiop - 2 * qiop * qiop + 7) * n + &
-                            2 * nom * (m_opt + 2) * (m_opt + 2) * (m_opt + 2))
-            IF (cost1.LE.cost2) THEN
+            cost1 = krylov_cost(t_now, t_out, t_opt, m, n, hnorm)
+            cost2 = krylov_cost(t_now, t_out, t_step, m_opt, n, hnorm)
+
+            IF (cost1<=cost2) THEN
                 t_new = t_opt
                 p1 = 10.0d0**(NINT(LOG10(t_new) - sqr1) - 1)
                 t_new = AINT(t_new / p1) * p1
@@ -380,8 +372,8 @@ CONTAINS
             ENDIF
         ENDIF
         !     If the Krylov step error is not acceptable, reject the stepsize
-        IF ((k1.NE.0).AND.(omega.GT.delta).AND.&
-                (mxreject.EQ.0.OR.ireject.LT.mxreject)) THEN
+        IF ((k1.NE.0).AND.(omega>delta).AND.&
+                (mxreject==0.OR.ireject<mxreject)) THEN
             IF (.NOT.m_changed) THEN
                 !                 Choose to change step size
                 t_step = MIN(t_out - t_now, &
@@ -397,7 +389,7 @@ CONTAINS
                 ENDIF
                 ireject = ireject + 1
                 nreject = nreject + 1
-                IF ((mxreject.NE.0).AND.(ireject.GT.mxreject)) THEN
+                IF ((mxreject.NE.0).AND.(ireject>mxreject)) THEN
                     PRINT*, 'Failure in DGEXPV: ---'
                     PRINT*, 'The requested tolerance is too high.'
                     PRINT*, 'Rerun with a smaller value.'
@@ -442,7 +434,7 @@ CONTAINS
         ENDIF
         imreject = 0
         jold = 1
-        IF (err_loc.LT.1.0d-16) t_new = MAX(t_new, 2.0d0 * t_step)
+        IF (err_loc<1.0d-16) t_new = MAX(t_new, 2.0d0 * t_step)
         mx = mbrkdwn + MAX(0, k1 - 1)
         irejectfsp = 0
 
@@ -453,7 +445,7 @@ CONTAINS
 
             !     Ensure FSP non-negativity and compute the probability sum
             DO i = 1, fsp%size
-                IF (w(i).LT.0.0d0)      w(i) = 0.0d0
+                IF (w(i)<0.0d0)      w(i) = 0.0d0
             ENDDO
             wsum = dasum(fsp%size, w, 1)
 
@@ -471,12 +463,12 @@ CONTAINS
 
                 !           If the FSP has been rejected too many times, jumpt to SSA
                 !           loop to expand the state space
-                IF (irejectfsp.GE.5) THEN
+                IF (irejectfsp>=5) THEN
                     w(1:n) = beta * wsp(iv:iv + n - 1)
                     nstep = nstep - 1
                     t_ssa = t_new
                     go to 404
-                ELSEIF (irejectfsp.EQ.1) THEN
+                ELSEIF (irejectfsp==1) THEN
                     fsporder = 2
                 ELSE
                     fsporder = LOG(error / errorold) / &
@@ -511,21 +503,21 @@ CONTAINS
 
         !     If the integration is at the end time point, then the algorithm
         !     is finished
-        IF (t_now.GE.t_out) go to 500
+        IF (t_now>=t_out) go to 500
 
         !     Reduce the state space to only substantial states
         IF (nstep > 1 .AND. iexpand /= 1) THEN
             dsum = wsum - (1.0d0 - ferrorbound(t_now))
-            IF (dsum.GT.0.0d0) CALL drop_states(w, fsp, model, dsum, fmatvec)
+            IF (dsum>0.0d0) CALL drop_states(w, fsp, model, dsum, fmatvec)
         ENDIF
 
         !-------------------------------------------State space expansion by SSA
         !-----------------------------in the case where the stepsize was reduced
         404    CONTINUE
 
-        IF ((iexpand.EQ.1).AND.(t_now.LT.t_out)) THEN
+        IF ((iexpand==1).AND.(t_now<t_out)) THEN
 
-            IF (nstep.EQ.1) t_new = t_step
+            IF (nstep==1) t_new = t_step
             t_ssa = MIN(t_new, t_out - t_now)
 
             IF (itrace.NE.0) THEN
@@ -536,7 +528,7 @@ CONTAINS
             CALL SSA_extender(t_ssa, fsp, model)
             CALL onestep_extender(fsp, model)
 
-            IF (n_now.GT.nfull) n_now = nfull
+            IF (n_now>nfull) n_now = nfull
             iexpand = 0
 
         ENDIF
@@ -555,7 +547,7 @@ CONTAINS
         p1 = 10.0d0**(NINT(LOG10(t_new) - sqr1) - 1)
         t_new = AINT(t_new / p1 + 0.55d0) * p1
         !     Return to the beginning for the next time step
-        IF ((mxstep.EQ.0).OR.(nstep.LT.mxstep)) go to 100
+        IF ((mxstep==0).OR.(nstep<mxstep)) go to 100
         iflag = 1
 
         !-------------------------------------------Output important information
@@ -606,7 +598,7 @@ CONTAINS
             DO i = 1, n
                 DO j = 1, bw
                     k = matrix%adj(j, i)
-                    IF (k.GE.1) THEN
+                    IF (k>=1) THEN
                         y(k) = y(k) + matrix%offdiag(j, i) * x(i)
                     ENDIF
                 ENDDO
@@ -621,24 +613,40 @@ CONTAINS
             DOUBLE PRECISION, INTENT(in) :: tx
             !-----------------Compute the FSP error tolerance for this time interval
             ferrorbound = tx * FSPTol / t_out
-            !     ferrorbound = FSPTol*(tx/t_out)**(2.0d0)
-            !     ferrorbound = FSPTol*(tx/t_out)**(10.0d0)
         END FUNCTION ferrorbound
+
+        DOUBLE PRECISION FUNCTION krylov_cost(t_now, t_out, tau, m, n, hnorm)
+            ! Estimate the cost of the Krylov approximation associated with a particular choice of stepsize and basis size.
+            ! t_now: current time
+            ! t_out: final time
+            ! tau: stepsize
+            ! m: Krylov basis size
+            ! n: solution vector length
+            ! hnorm: norm of the Hessenberg matrix computed from the last time step
+            IMPLICIT NONE
+
+            INTEGER, INTENT(IN) :: m, n
+            DOUBLE PRECISION, INTENT(IN) :: tau, hnorm, t_now, t_out
+            DOUBLE PRECISION :: nom
+
+            nom = 25.0d0 / 3.0d0 + &
+                    MAX(0, 2 + INT(LOG(tau * hnorm) / LOG(2.0d0)))
+            krylov_cost = NINT((t_out - t_now) / tau) * &
+                    (2 * (m + 1) * nnz + &
+                            (5 * m + 4 * qiop * m + 2 * qiop - 2 * qiop * qiop + 7) * n + &
+                            2 * nom * (m + 2) * (m + 2) * (m + 2))
+
+        END FUNCTION
 
         SUBROUTINE print_stats
             IMPLICIT NONE
 
-            PRINT*, 'integration', nstep, '-------------------------------'
+            PRINT*, 'timestep', nstep, '-------------------------------'
             PRINT*, 'FSP size         =', fsp%size
-            PRINT*, 'scale-square     =', ns
             PRINT*, 'step_size        =', t_step
-            PRINT*, 'err_loc          =', err_loc
             PRINT*, 'next_step        =', t_new
             PRINT*, 't_now            =', t_now
             PRINT*, 'Krylov dimension =', m
-            PRINT*, 'qiop             =', qiop
-            PRINT*, 'entropy          =', ent
-            PRINT*, 'norm(Hm)         =', hnorm
 
         END SUBROUTINE print_stats
 
