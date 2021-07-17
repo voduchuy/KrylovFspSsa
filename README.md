@@ -1,6 +1,10 @@
 # KrylovFspSsa
 
-Refactored Fortran codes for the Krylov-FSP-SSA algorithm. 
+Fortran implementation of the  Krylov-FSP-SSA algorithm. 
+
+Reference:
+R.B.Sidje, H.D.Vo. "Solving the chemical master equation by a fast adaptive finite state projection based on the stochastic simulation algorithm". _Mathematical Biosciences_, Vol. 269, November 2015.
+
 ## System requirements
 This repository has been compiled successfully on ubuntu18.04 with the following libraries (installed with ```sudo apt-get install```):
 1) libblas
