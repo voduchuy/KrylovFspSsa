@@ -3,6 +3,7 @@
 Fortran implementation of the  Krylov-FSP-SSA algorithm. 
 
 Reference:
+
 R.B.Sidje, H.D.Vo. "Solving the chemical master equation by a fast adaptive finite state projection based on the stochastic simulation algorithm". _Mathematical Biosciences_, Vol. 269, November 2015.
 
 ## System requirements
